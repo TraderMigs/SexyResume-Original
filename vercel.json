@@ -45,7 +45,7 @@
       ]
     },
     {
-      "source": "/(.*)\\.(?:js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)",
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -53,21 +53,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "VITE_SUPABASE_URL": "@supabase-url",
-    "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "VITE_STRIPE_PUBLISHABLE_KEY": "@stripe-publishable-key",
-    "VITE_STRIPE_PRICE_ID": "@stripe-price-id",
-    "VITE_SENTRY_DSN": "@sentry-dsn",
-    "VITE_POSTHOG_KEY": "@posthog-key",
-    "VITE_POSTHOG_HOST": "@posthog-host"
-  },
-  "build": {
-    "env": {
-      "SENTRY_ORG": "@sentry-org",
-      "SENTRY_PROJECT": "@sentry-project",
-      "SENTRY_AUTH_TOKEN": "@sentry-auth-token"
-    }
-  }
+  ]
 }
