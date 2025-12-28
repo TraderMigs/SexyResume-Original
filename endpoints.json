@@ -1,0 +1,1069 @@
+{
+  "metadata": {
+    "generated_at": "2025-01-27T00:00:00Z",
+    "version": "1.0.0",
+    "total_endpoints": 47,
+    "auth_scopes": {
+      "public": 3,
+      "user": 38,
+      "admin": 6
+    }
+  },
+  "endpoints": [
+    {
+      "path": "/functions/v1/auth/signup",
+      "method": "POST",
+      "auth_scope": "public",
+      "handler_file": "supabase/functions/auth/index.ts",
+      "description": "Create new user account",
+      "input_schema": {
+        "type": "object",
+        "required": ["email", "password", "fullName"],
+        "properties": {
+          "email": {"type": "string", "format": "email"},
+          "password": {"type": "string", "minLength": 12},
+          "fullName": {"type": "string", "maxLength": 100}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "user": {"type": "object"},
+          "session": {"type": "object"},
+          "message": {"type": "string"}
+        }
+      },
+      "idempotency": "Not idempotent - creates new user each time",
+      "rate_limit": "5 requests per 5 minutes per email",
+      "rls_tables": ["users", "user_entitlements"],
+      "auth_checks": ["Password strength validation", "Email format validation"]
+    },
+    {
+      "path": "/functions/v1/auth/signin",
+      "method": "POST",
+      "auth_scope": "public",
+      "handler_file": "supabase/functions/auth/index.ts",
+      "description": "Sign in existing user",
+      "input_schema": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {"type": "string", "format": "email"},
+          "password": {"type": "string"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "user": {"type": "object"},
+          "session": {"type": "object"},
+          "message": {"type": "string"}
+        }
+      },
+      "idempotency": "Idempotent - same credentials return same session",
+      "rate_limit": "5 attempts per 5 minutes per email",
+      "rls_tables": ["users"],
+      "auth_checks": ["Credential validation", "Rate limiting"]
+    },
+    {
+      "path": "/functions/v1/auth/signout",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/auth/index.ts",
+      "description": "Sign out current user",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      },
+      "idempotency": "Idempotent - multiple signouts have same effect",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": [],
+      "auth_checks": ["JWT token validation"]
+    },
+    {
+      "path": "/functions/v1/auth/me",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/auth/index.ts",
+      "description": "Get current user profile",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "user": {"type": "object"},
+          "profile": {"type": "object"}
+        }
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["users"],
+      "auth_checks": ["JWT token validation", "User ownership via auth.uid()"]
+    },
+    {
+      "path": "/functions/v1/resumes",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/resumes/index.ts",
+      "description": "Get all user's resumes",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "array",
+        "items": {"$ref": "#/definitions/Resume"}
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["resumes"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/resumes",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/resumes/index.ts",
+      "description": "Create new resume",
+      "input_schema": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "title": {"type": "string"},
+          "data": {"type": "object"},
+          "template": {"type": "string", "enum": ["modern", "classic", "creative", "minimal", "executive"]}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/Resume"},
+      "idempotency": "Not idempotent - creates new resume each time",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["resumes"],
+      "auth_checks": ["JWT token validation", "User ID injection via auth.uid()"]
+    },
+    {
+      "path": "/functions/v1/resumes/{id}",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/resumes/index.ts",
+      "description": "Get specific resume",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/Resume"},
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["resumes"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/resumes/{id}",
+      "method": "PUT",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/resumes/index.ts",
+      "description": "Update existing resume",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "data": {"type": "object"},
+          "template": {"type": "string"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/Resume"},
+      "idempotency": "Idempotent - same input produces same result",
+      "rate_limit": "100 requests per hour",
+      "rls_tables": ["resumes"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/resumes/{id}",
+      "method": "DELETE",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/resumes/index.ts",
+      "description": "Delete resume",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      },
+      "idempotency": "Idempotent - multiple deletes have same effect",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["resumes"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/parse-resume",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/parse-resume/index.ts",
+      "description": "Parse uploaded resume with AI",
+      "input_schema": {
+        "type": "object",
+        "required": ["resume"],
+        "properties": {
+          "resume": {"type": "string", "format": "binary", "maxSize": 10485760}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "parsedResume": {"$ref": "#/definitions/Resume"},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "message": {"type": "string"}
+        }
+      },
+      "idempotency": "Not idempotent - AI may produce different results",
+      "rate_limit": "5 requests per hour",
+      "rls_tables": [],
+      "auth_checks": ["JWT token validation", "File type validation", "File size validation"]
+    },
+    {
+      "path": "/functions/v1/parse-review/create",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/parse-review/index.ts",
+      "description": "Create enhanced parse review with field-level validation",
+      "input_schema": {
+        "type": "object",
+        "required": ["file"],
+        "properties": {
+          "file": {"type": "string", "format": "binary", "maxSize": 10485760}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/ParseReviewData"},
+      "idempotency": "Not idempotent - creates new review each time",
+      "rate_limit": "10 requests per hour",
+      "rls_tables": ["parse_reviews"],
+      "auth_checks": ["JWT token validation", "User ID injection"]
+    },
+    {
+      "path": "/functions/v1/parse-review/{id}",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/parse-review/index.ts",
+      "description": "Get specific parse review",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/ParseReviewData"},
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["parse_reviews"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/parse-review/validate",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/parse-review/index.ts",
+      "description": "Validate field corrections",
+      "input_schema": {
+        "type": "object",
+        "required": ["parseId", "corrections"],
+        "properties": {
+          "parseId": {"type": "string", "format": "uuid"},
+          "corrections": {"type": "array", "items": {"$ref": "#/definitions/FieldCorrection"}}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/ValidationResponse"},
+      "idempotency": "Idempotent - same corrections produce same result",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["parse_reviews"],
+      "auth_checks": ["JWT token validation", "Parse review ownership"]
+    },
+    {
+      "path": "/functions/v1/ai-enhance/request",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/ai-enhance/index.ts",
+      "description": "Request AI content enhancement",
+      "input_schema": {
+        "type": "object",
+        "required": ["resumeId", "tonePreset"],
+        "properties": {
+          "resumeId": {"type": "string", "format": "uuid"},
+          "targetRole": {"type": "string"},
+          "targetIndustry": {"type": "string"},
+          "tonePreset": {"type": "string", "enum": ["executive", "professional", "creative", "technical", "entry_level"]},
+          "stylePreferences": {"type": "object"},
+          "sectionsToEnhance": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/EnhancementRequest"},
+      "idempotency": "Not idempotent - AI may produce different suggestions",
+      "rate_limit": "10 requests per hour",
+      "rls_tables": ["enhancement_requests", "enhancement_suggestions"],
+      "auth_checks": ["JWT token validation", "Resume ownership verification"]
+    },
+    {
+      "path": "/functions/v1/ai-enhance/suggestions/{id}",
+      "method": "PUT",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/ai-enhance/index.ts",
+      "description": "Accept, reject, or modify enhancement suggestions",
+      "input_schema": {
+        "type": "object",
+        "required": ["action"],
+        "properties": {
+          "action": {"type": "string", "enum": ["accepted", "rejected", "modified"]},
+          "modifiedText": {"type": "string"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/EnhancementSuggestion"},
+      "idempotency": "Idempotent - same action produces same result",
+      "rate_limit": "100 requests per hour",
+      "rls_tables": ["enhancement_suggestions"],
+      "auth_checks": ["JWT token validation", "Suggestion ownership via request ownership"]
+    },
+    {
+      "path": "/functions/v1/job-matching/recommendations",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/job-matching/index.ts",
+      "description": "Generate job role recommendations",
+      "input_schema": {
+        "type": "object",
+        "required": ["resumeId"],
+        "properties": {
+          "resumeId": {"type": "string", "format": "uuid"},
+          "targetIndustry": {"type": "string"},
+          "seniorityPreference": {"type": "string", "enum": ["entry", "mid", "senior", "executive"]}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/JobRecommendations"},
+      "idempotency": "Not idempotent - recommendations may change based on data updates",
+      "rate_limit": "20 requests per hour",
+      "rls_tables": ["role_recommendations", "job_roles"],
+      "auth_checks": ["JWT token validation", "Resume ownership verification"]
+    },
+    {
+      "path": "/functions/v1/job-matching/roles",
+      "method": "GET",
+      "auth_scope": "public",
+      "handler_file": "supabase/functions/job-matching/index.ts",
+      "description": "Get available job roles with filtering",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "industry": {"type": "string"},
+          "seniority": {"type": "string"},
+          "remote": {"type": "boolean"},
+          "limit": {"type": "integer", "default": 20, "maximum": 100}
+        }
+      },
+      "output_schema": {
+        "type": "array",
+        "items": {"$ref": "#/definitions/JobRole"}
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["job_roles"],
+      "auth_checks": ["None - public data"]
+    },
+    {
+      "path": "/functions/v1/cover-letter",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/cover-letter/index.ts",
+      "description": "Get all user's cover letters",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "array",
+        "items": {"$ref": "#/definitions/CoverLetter"}
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["cover_letters"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/cover-letter/generate",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/cover-letter/index.ts",
+      "description": "Generate AI cover letter",
+      "input_schema": {
+        "type": "object",
+        "required": ["targetRole", "tone", "length"],
+        "properties": {
+          "resumeId": {"type": "string", "format": "uuid"},
+          "resumeData": {"type": "object"},
+          "targetRole": {"type": "string"},
+          "companyName": {"type": "string"},
+          "jobDescription": {"type": "string"},
+          "tone": {"type": "string", "enum": ["formal", "neutral", "friendly"]},
+          "length": {"type": "string", "enum": ["short", "standard", "detailed"]},
+          "keywords": {"type": "array", "items": {"type": "string"}},
+          "matchResumeTemplate": {"type": "boolean"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/CoverLetter"},
+      "idempotency": "Not idempotent - AI may produce different content",
+      "rate_limit": "10 requests per hour",
+      "rls_tables": ["cover_letters", "cover_letter_drafts", "cover_letter_telemetry"],
+      "auth_checks": ["JWT token validation", "Resume ownership if resumeId provided"]
+    },
+    {
+      "path": "/functions/v1/cover-letter/{id}",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/cover-letter/index.ts",
+      "description": "Get specific cover letter",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/CoverLetter"},
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["cover_letters"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/cover-letter/{id}",
+      "method": "PUT",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/cover-letter/index.ts",
+      "description": "Update cover letter",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sections": {"type": "array"},
+          "plainText": {"type": "string"},
+          "htmlContent": {"type": "string"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/CoverLetter"},
+      "idempotency": "Idempotent - same input produces same result",
+      "rate_limit": "100 requests per hour",
+      "rls_tables": ["cover_letters", "cover_letter_drafts"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/cover-letter/{id}",
+      "method": "DELETE",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/cover-letter/index.ts",
+      "description": "Delete cover letter",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        }
+      },
+      "idempotency": "Idempotent - multiple deletes have same effect",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["cover_letters"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/export-resume",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/export-resume/index.ts",
+      "description": "Export resume in specified format",
+      "input_schema": {
+        "type": "object",
+        "required": ["resumeId", "format"],
+        "properties": {
+          "resumeId": {"type": "string", "format": "uuid"},
+          "format": {"type": "string", "enum": ["pdf", "docx", "txt", "ats"]},
+          "template": {"type": "string"},
+          "watermark": {"type": "boolean"},
+          "customizations": {"type": "object"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/ExportResult"},
+      "idempotency": "Not idempotent - generates new file each time",
+      "rate_limit": "20 requests per hour",
+      "rls_tables": ["exports", "resumes"],
+      "auth_checks": ["JWT token validation", "Resume ownership verification", "Export entitlement check"]
+    },
+    {
+      "path": "/functions/v1/exports/{id}",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/export-resume/index.ts",
+      "description": "Get export download URL",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "downloadUrl": {"type": "string", "format": "uri"},
+          "expiresAt": {"type": "string", "format": "date-time"},
+          "format": {"type": "string"},
+          "fileSize": {"type": "integer"}
+        }
+      },
+      "idempotency": "Not idempotent - generates new signed URL each time",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["exports"],
+      "auth_checks": ["JWT token validation", "Export ownership via RLS", "Expiration check"]
+    },
+    {
+      "path": "/functions/v1/stripe-checkout",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/stripe-checkout/index.ts",
+      "description": "Create Stripe checkout session",
+      "input_schema": {
+        "type": "object",
+        "required": ["price_id", "success_url", "cancel_url", "mode"],
+        "properties": {
+          "price_id": {"type": "string"},
+          "success_url": {"type": "string", "format": "uri"},
+          "cancel_url": {"type": "string", "format": "uri"},
+          "mode": {"type": "string", "enum": ["payment", "subscription"]}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "sessionId": {"type": "string"},
+          "url": {"type": "string", "format": "uri"}
+        }
+      },
+      "idempotency": "Not idempotent - creates new session each time",
+      "rate_limit": "10 requests per hour",
+      "rls_tables": ["stripe_customers", "stripe_subscriptions", "checkout_sessions"],
+      "auth_checks": ["JWT token validation", "Duplicate purchase check"]
+    },
+    {
+      "path": "/functions/v1/stripe-webhook",
+      "method": "POST",
+      "auth_scope": "public",
+      "handler_file": "supabase/functions/stripe-webhook/index.ts",
+      "description": "Handle Stripe webhook events",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string"},
+          "data": {"type": "object"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "received": {"type": "boolean"}
+        }
+      },
+      "idempotency": "Idempotent - webhook events processed once",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["user_entitlements", "payment_receipts", "checkout_sessions"],
+      "auth_checks": ["Stripe signature verification", "Idempotency key checking"]
+    },
+    {
+      "path": "/functions/v1/payments/entitlement",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/payments/index.ts",
+      "description": "Get user payment entitlement",
+      "input_schema": {"type": "object"},
+      "output_schema": {"$ref": "#/definitions/UserEntitlement"},
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["user_entitlements"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/growth/referral-code",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/growth/index.ts",
+      "description": "Get user's referral code",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string"},
+          "usageCount": {"type": "integer"},
+          "maxUses": {"type": "integer"},
+          "rewardType": {"type": "string"},
+          "rewardAmount": {"type": "integer"},
+          "isActive": {"type": "boolean"}
+        }
+      },
+      "idempotency": "Idempotent - returns existing or creates new code",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["referral_codes"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/growth/process-referral",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/growth/index.ts",
+      "description": "Process referral conversion",
+      "input_schema": {
+        "type": "object",
+        "required": ["referralCode", "conversionType"],
+        "properties": {
+          "referralCode": {"type": "string"},
+          "conversionType": {"type": "string", "enum": ["signup", "first_export", "payment"]}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"},
+          "referrerReward": {"type": "integer"},
+          "referredReward": {"type": "integer"}
+        }
+      },
+      "idempotency": "Idempotent - same referral processed once",
+      "rate_limit": "20 requests per hour",
+      "rls_tables": ["referral_conversions", "credit_transactions"],
+      "auth_checks": ["JWT token validation", "Self-referral prevention", "Fraud detection"]
+    },
+    {
+      "path": "/functions/v1/growth/achievements",
+      "method": "GET",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/growth/index.ts",
+      "description": "Get user achievements and progress",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "achievements": {"type": "array", "items": {"$ref": "#/definitions/Achievement"}},
+          "progress": {"type": "array", "items": {"$ref": "#/definitions/AchievementProgress"}},
+          "creditBalance": {"type": "integer"}
+        }
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["user_achievements", "credit_transactions"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/growth/upsell-interaction",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/growth/index.ts",
+      "description": "Track upsell campaign interactions",
+      "input_schema": {
+        "type": "object",
+        "required": ["campaignId", "variantId", "interactionType"],
+        "properties": {
+          "campaignId": {"type": "string", "format": "uuid"},
+          "variantId": {"type": "string"},
+          "interactionType": {"type": "string", "enum": ["shown", "clicked", "dismissed", "converted"]},
+          "sessionId": {"type": "string"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"}
+        }
+      },
+      "idempotency": "Idempotent - same interaction recorded once",
+      "rate_limit": "100 requests per hour",
+      "rls_tables": ["user_campaign_interactions"],
+      "auth_checks": ["JWT token validation", "User ownership via RLS"]
+    },
+    {
+      "path": "/functions/v1/analytics/track",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/analytics/index.ts",
+      "description": "Track analytics event",
+      "input_schema": {
+        "type": "object",
+        "required": ["event", "timestamp"],
+        "properties": {
+          "event": {"type": "string"},
+          "properties": {"type": "object"},
+          "timestamp": {"type": "integer"},
+          "session_id": {"type": "string"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"}
+        }
+      },
+      "idempotency": "Not idempotent - events can be tracked multiple times",
+      "rate_limit": "200 requests per hour",
+      "rls_tables": ["analytics_events"],
+      "auth_checks": ["JWT token validation", "PII sanitization"]
+    },
+    {
+      "path": "/functions/v1/analytics/funnel",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/analytics/index.ts",
+      "description": "Track funnel step",
+      "input_schema": {
+        "type": "object",
+        "required": ["funnel", "step", "timestamp"],
+        "properties": {
+          "funnel": {"type": "string"},
+          "step": {"type": "string"},
+          "user_id": {"type": "string", "format": "uuid"},
+          "properties": {"type": "object"},
+          "timestamp": {"type": "integer"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"}
+        }
+      },
+      "idempotency": "Not idempotent - funnel steps can be tracked multiple times",
+      "rate_limit": "200 requests per hour",
+      "rls_tables": ["funnel_analytics"],
+      "auth_checks": ["JWT token validation", "PII sanitization"]
+    },
+    {
+      "path": "/functions/v1/analytics-dashboard/metrics",
+      "method": "GET",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/analytics-dashboard/index.ts",
+      "description": "Get SaaS metrics and KPIs",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "period": {"type": "string", "enum": ["daily", "weekly", "monthly"]},
+          "startDate": {"type": "string", "format": "date"},
+          "endDate": {"type": "string", "format": "date"}
+        }
+      },
+      "output_schema": {"$ref": "#/definitions/SaaSMetrics"},
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["analytics_events", "cohort_analysis", "funnel_analytics"],
+      "auth_checks": ["JWT token validation", "Admin role verification"]
+    },
+    {
+      "path": "/functions/v1/analytics-dashboard/query",
+      "method": "POST",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/analytics-dashboard/index.ts",
+      "description": "Natural language analytics queries",
+      "input_schema": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {"type": "string"},
+          "context": {"type": "object"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "answer": {"type": "string"},
+          "data": {"type": "object"},
+          "suggestions": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "idempotency": "Not idempotent - AI may produce different answers",
+      "rate_limit": "20 requests per hour",
+      "rls_tables": ["analytics_events", "dashboard_metrics"],
+      "auth_checks": ["JWT token validation", "Admin role verification"]
+    },
+    {
+      "path": "/functions/v1/admin/permissions",
+      "method": "GET",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/admin/index.ts",
+      "description": "Get admin user permissions",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "user": {"type": "object"},
+          "role": {"type": "string"},
+          "permissions": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "100 requests per minute",
+      "rls_tables": ["admin_users"],
+      "auth_checks": ["JWT token validation", "Admin role verification"]
+    },
+    {
+      "path": "/functions/v1/admin/dashboard",
+      "method": "GET",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/admin/index.ts",
+      "description": "Get admin dashboard data",
+      "input_schema": {"type": "object"},
+      "output_schema": {"$ref": "#/definitions/AdminDashboard"},
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["users", "resumes", "exports", "payment_receipts"],
+      "auth_checks": ["JWT token validation", "Admin role verification"]
+    },
+    {
+      "path": "/functions/v1/admin/users",
+      "method": "GET",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/admin/index.ts",
+      "description": "Get user management data",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "userId": {"type": "string", "format": "uuid"},
+          "page": {"type": "integer", "default": 1},
+          "limit": {"type": "integer", "default": 50, "maximum": 100}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "users": {"type": "array"},
+          "pagination": {"type": "object"}
+        }
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "50 requests per hour",
+      "rls_tables": ["users", "resumes", "exports", "user_entitlements"],
+      "auth_checks": ["JWT token validation", "Admin role verification"]
+    },
+    {
+      "path": "/functions/v1/data-purge/status",
+      "method": "GET",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/data-purge/index.ts",
+      "description": "Get data purge status",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "policies": {"type": "array"},
+          "purgeStatus": {"type": "array"},
+          "recentJobs": {"type": "array"},
+          "totalRecordsToProcess": {"type": "integer"}
+        }
+      },
+      "idempotency": "Idempotent - read operation",
+      "rate_limit": "20 requests per hour",
+      "rls_tables": ["data_retention_policies", "purge_jobs"],
+      "auth_checks": ["JWT token validation", "Admin role verification"]
+    },
+    {
+      "path": "/functions/v1/data-purge/run",
+      "method": "POST",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/data-purge/index.ts",
+      "description": "Execute data purge job",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "tableNames": {"type": "array", "items": {"type": "string"}},
+          "dryRun": {"type": "boolean", "default": false}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"},
+          "results": {"type": "array"},
+          "totalDeleted": {"type": "integer"},
+          "totalArchived": {"type": "integer"}
+        }
+      },
+      "idempotency": "Not idempotent - purges data each time",
+      "rate_limit": "5 requests per hour",
+      "rls_tables": ["data_retention_policies", "purge_jobs", "archived_data"],
+      "auth_checks": ["JWT token validation", "Admin role verification", "Legal hold check"]
+    },
+    {
+      "path": "/functions/v1/data-purge/force",
+      "method": "POST",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/data-purge/index.ts",
+      "description": "Force purge specific records",
+      "input_schema": {
+        "type": "object",
+        "required": ["tableName", "recordIds", "reason"],
+        "properties": {
+          "tableName": {"type": "string"},
+          "recordIds": {"type": "array", "items": {"type": "string"}},
+          "reason": {"type": "string"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"},
+          "recordsDeleted": {"type": "integer"}
+        }
+      },
+      "idempotency": "Idempotent - same records deleted once",
+      "rate_limit": "10 requests per hour",
+      "rls_tables": ["admin_logs"],
+      "auth_checks": ["JWT token validation", "Super admin role verification", "Audit logging"]
+    },
+    {
+      "path": "/functions/v1/data-lifecycle/export",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/data-lifecycle/index.ts",
+      "description": "Export user's personal data (GDPR)",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "format": {"type": "string", "enum": ["json", "csv"], "default": "json"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "downloadUrl": {"type": "string"},
+          "expiresAt": {"type": "string", "format": "date-time"}
+        }
+      },
+      "idempotency": "Not idempotent - generates new export each time",
+      "rate_limit": "5 requests per day",
+      "rls_tables": ["users", "resumes", "cover_letters", "exports", "payment_receipts"],
+      "auth_checks": ["JWT token validation", "User data aggregation via RLS"]
+    },
+    {
+      "path": "/functions/v1/data-lifecycle/delete-account",
+      "method": "POST",
+      "auth_scope": "user",
+      "handler_file": "supabase/functions/data-lifecycle/index.ts",
+      "description": "Delete user account (GDPR)",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "immediate": {"type": "boolean", "default": false}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "deletionJobId": {"type": "string"},
+          "summary": {"type": "object"}
+        }
+      },
+      "idempotency": "Not idempotent - creates deletion job each time",
+      "rate_limit": "1 request per day",
+      "rls_tables": ["users", "resumes", "cover_letters", "exports", "audit_logs"],
+      "auth_checks": ["JWT token validation", "Legal hold check", "Grace period handling"]
+    },
+    {
+      "path": "/functions/v1/cleanup-exports",
+      "method": "POST",
+      "auth_scope": "admin",
+      "handler_file": "supabase/functions/cleanup-exports/index.ts",
+      "description": "Clean up expired export files",
+      "input_schema": {"type": "object"},
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"},
+          "summary": {"type": "object"}
+        }
+      },
+      "idempotency": "Idempotent - cleans up same expired files",
+      "rate_limit": "10 requests per hour",
+      "rls_tables": ["exports"],
+      "auth_checks": ["Service role authentication", "Expiration validation"]
+    }
+  ],
+  "definitions": {
+    "Resume": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "format": "uuid"},
+        "personalInfo": {"$ref": "#/definitions/PersonalInfo"},
+        "experience": {"type": "array", "items": {"$ref": "#/definitions/Experience"}},
+        "education": {"type": "array", "items": {"$ref": "#/definitions/Education"}},
+        "skills": {"type": "array", "items": {"$ref": "#/definitions/Skill"}},
+        "projects": {"type": "array", "items": {"$ref": "#/definitions/Project"}},
+        "template": {"type": "string"},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "PersonalInfo": {
+      "type": "object",
+      "properties": {
+        "fullName": {"type": "string"},
+        "email": {"type": "string", "format": "email"},
+        "phone": {"type": "string"},
+        "location": {"type": "string"},
+        "linkedin": {"type": "string", "format": "uri"},
+        "website": {"type": "string", "format": "uri"},
+        "summary": {"type": "string"}
+      }
+    },
+    "Experience": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "company": {"type": "string"},
+        "position": {"type": "string"},
+        "startDate": {"type": "string"},
+        "endDate": {"type": "string"},
+        "current": {"type": "boolean"},
+        "description": {"type": "string"},
+        "achievements": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "Education": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "institution": {"type": "string"},
+        "degree": {"type": "string"},
+        "field": {"type": "string"},
+        "startDate": {"type": "string"},
+        "endDate": {"type": "string"},
+        "gpa": {"type": "string"},
+        "honors": {"type": "string"}
+      }
+    },
+    "Skill": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "level": {"type": "string", "enum": ["Beginner", "Intermediate", "Advanced", "Expert"]},
+        "category": {"type": "string", "enum": ["Technical", "Soft", "Language", "Other"]}
+      }
+    },
+    "Project": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "technologies": {"type": "array", "items": {"type": "string"}},
+        "url": {"type": "string", "format": "uri"},
+        "startDate": {"type": "string"},
+        "endDate": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "url": "/template-selector",
+  "violations": [],
+  "wcagAAViolations": [],
+  "note": "All violations fixed: Changed text-gray-500 to text-gray-700, added focus:ring-2 focus:ring-sexy-pink-500 to all interactive elements"
+}

@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://sexyresume.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Block sensitive areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /auth/
+Disallow: /exports/
+Disallow: /uploads/
+
+# Allow important pages
+Allow: /
+Allow: /templates
+Allow: /features
+Allow: /pricing
+Allow: /privacy
+Allow: /terms

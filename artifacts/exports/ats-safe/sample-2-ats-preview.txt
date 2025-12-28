@@ -1,0 +1,54 @@
+PREVIEW VERSION - SEXYRESUME.COM
+
+Marcus Johnson
+EMAIL: marcus.j@design.com
+PHONE: +1 (555) 234-5678
+LOCATION: New York, NY
+
+PROFESSIONAL SUMMARY:
+Creative product designer with 6 years of experience crafting user-centered digital experiences. Specialized in UX/UI design, design systems, and cross-functional collaboration. Proven track record of increasing user engagement and satisfaction metrics.
+
+CORE COMPETENCIES:
+Figma, Sketch, Adobe Creative Suite, Prototyping, User Research, Design Systems, HTML/CSS, Communication, Collaboration
+
+PROFESSIONAL EXPERIENCE:
+
+POSITION 1:
+JOB TITLE: Lead Product Designer
+COMPANY NAME: DesignHub
+EMPLOYMENT DATES: 2021-06 to Present
+JOB DESCRIPTION: Leading design initiatives for enterprise SaaS product
+KEY ACHIEVEMENTS:
+- Redesigned core product experience, increasing user retention by 35%
+- Established company-wide design system used by 50+ designers and developers
+- Conducted user research with 100+ participants to inform product strategy
+- Mentored 3 junior designers on UX best practices and design thinking
+
+POSITION 2:
+JOB TITLE: Product Designer
+COMPANY NAME: CreativeLabs
+EMPLOYMENT DATES: 2019-01 to 2021-05
+JOB DESCRIPTION: End-to-end product design for mobile and web applications
+KEY ACHIEVEMENTS:
+- Designed mobile app that reached #1 in App Store category
+- Created prototypes for 15+ features using Figma and Framer
+- Collaborated with engineers to ensure design feasibility and quality
+
+EDUCATION:
+
+EDUCATION 1:
+DEGREE TYPE: Bachelor of Fine Arts
+FIELD OF STUDY: Graphic Design
+INSTITUTION NAME: Rhode Island School of Design
+GRADUATION DATE: 2018-05
+GPA: 3.9
+HONORS: Summa Cum Laude, Outstanding Portfolio Award
+
+RELEVANT PROJECTS:
+
+PROJECT 1:
+PROJECT NAME: Design System Library
+PROJECT DESCRIPTION: Comprehensive design system with 100+ components
+TECHNOLOGIES USED: Figma, React, Storybook
+
+CREATED WITH SEXYRESUME.COM

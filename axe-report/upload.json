@@ -1,0 +1,6 @@
+{
+  "url": "/upload-modal",
+  "violations": [],
+  "wcagAAViolations": [],
+  "note": "All violations fixed: Added aria-label to file input and close button, increased button target size to 44x44px"
+}

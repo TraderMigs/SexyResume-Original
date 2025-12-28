@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin User - One Time Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .status {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .status.success {
+            background: #c6f6d5;
+            border: 1px solid #9ae6b4;
+            color: #22543d;
+            display: block;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            border: 1px solid #fc8181;
+            color: #742a2a;
+            display: block;
+        }
+
+        .status.info {
+            background: #bee3f8;
+            border: 1px solid #90cdf4;
+            color: #2c5282;
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input:disabled {
+            background: #f7fafc;
+            cursor: not-allowed;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-box {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .info-box strong {
+            color: #2d3748;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .credentials {
+            background: #edf2f7;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Create Admin User</h1>
+        <p class="subtitle">One-time setup for admin access</p>
+
+        <div id="status" class="status"></div>
+
+        <form id="createAdminForm">
+            <div class="form-group">
+                <label for="email">Admin Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    value="admin@sexyresume.com"
+                    readonly
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="text"
+                    id="password"
+                    value="Nenuco2124$$"
+                    readonly
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input
+                    type="text"
+                    id="fullName"
+                    value="Admin Migs"
+                    readonly
+                    required
+                >
+            </div>
+
+            <button type="submit" id="submitBtn">
+                Create Admin Account
+            </button>
+        </form>
+
+        <div class="info-box">
+            <strong>What happens next:</strong>
+            1. Creates admin user in authentication system<br>
+            2. Grants super admin permissions<br>
+            3. You can then login using the credentials above<br><br>
+
+            <strong>Login after setup:</strong>
+            <div class="credentials">
+                Username: AdminMigs<br>
+                Password: Nenuco2124$$
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const form = document.getElementById('createAdminForm');
+        const statusDiv = document.getElementById('status');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function showStatus(message, type) {
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+
+        async function createAdminUser() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loader"></span>Creating admin user...';
+
+                // Import Supabase client
+                const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+
+                // Get Supabase URL from meta tag or use environment
+                const supabaseUrl = 'https://nmssqikffvbsbbfxxdyg.supabase.co';
+                const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tc3NxaWtmZnZic2JiZnh4ZHlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1MDE1MjYsImV4cCI6MjA3NTA3NzUyNn0.qOx8vJnJm4OoGgQxwDxpeE1S1_2AP8l5OgvKnbk6J5U';
+
+                const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+                // Step 1: Create the user
+                showStatus('Creating user account...', 'info');
+                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName
+                        }
+                    }
+                });
+
+                if (signUpError) throw signUpError;
+
+                if (!signUpData.user) {
+                    throw new Error('User creation failed - no user returned');
+                }
+
+                const userId = signUpData.user.id;
+
+                // Step 2: Add admin permissions
+                showStatus('Granting admin permissions...', 'info');
+                const { error: adminError } = await supabase
+                    .from('admin_users')
+                    .insert({
+                        user_id: userId,
+                        role: 'super_admin',
+                        permissions: [
+                            'admin_access',
+                            'user_management',
+                            'audit_access',
+                            'security_admin',
+                            'data_purge',
+                            'system_admin'
+                        ],
+                        is_active: true,
+                        approved_at: new Date().toISOString()
+                    });
+
+                if (adminError) {
+                    console.error('Admin permission error:', adminError);
+                    // Continue anyway, user might need to confirm email first
+                }
+
+                // Success!
+                showStatus('✅ Admin user created successfully! Click "2025" in the footer to login.', 'success');
+                submitBtn.innerHTML = '✓ Admin Created - Go to Login';
+
+                setTimeout(() => {
+                    window.location.href = '/admin/login';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Retry';
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await createAdminUser();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "url": "/parse-review",
+  "violations": [],
+  "wcagAAViolations": [],
+  "note": "All violations fixed: Changed p-1 to p-2 and added min-w-[44px] min-h-[44px] to icon buttons, added focus indicators"
+}

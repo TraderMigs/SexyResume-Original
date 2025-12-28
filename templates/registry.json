@@ -1,0 +1,415 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "lastUpdated": "2025-10-03T16:00:00Z",
+  "templates": {
+    "modern": {
+      "id": "modern",
+      "name": "Modern Professional",
+      "description": "Clean, contemporary design with gradient header and modern typography. Perfect for tech and creative professionals.",
+      "category": "modern",
+      "suitability": {
+        "industries": [
+          "Technology",
+          "Startups",
+          "Digital Marketing",
+          "Design",
+          "E-commerce",
+          "SaaS"
+        ],
+        "roles": [
+          "Software Engineer",
+          "Product Manager",
+          "Designer",
+          "Marketing Professional",
+          "Data Scientist",
+          "DevOps Engineer"
+        ],
+        "seniority": ["entry", "mid", "senior"],
+        "bestFor": "Technical professionals with 0-10 years experience in modern, fast-paced industries"
+      },
+      "density": "medium",
+      "atsMetadata": {
+        "safety": "high",
+        "parseability": 95,
+        "plainTextFallback": true,
+        "knownIssues": [],
+        "recommendations": [
+          "Use standard section headings",
+          "Avoid complex layouts in ATS variant",
+          "Include keywords in plain text"
+        ]
+      },
+      "layoutConfig": {
+        "type": "single-column",
+        "headerStyle": "gradient",
+        "sectionSpacing": "medium",
+        "marginsPx": {"top": 40, "right": 40, "bottom": 40, "left": 40},
+        "fontSizes": {"h1": 28, "h2": 16, "body": 11},
+        "lineHeight": 1.5
+      },
+      "allowedOverrides": {
+        "fonts": ["Inter", "Roboto", "Open Sans", "Lato", "Source Sans Pro"],
+        "accentColors": ["#d946ef", "#0ba5d9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"],
+        "sectionOrder": true,
+        "hideEmptySections": true,
+        "compactMode": false
+      },
+      "constraints": {
+        "maxExperience": 8,
+        "maxEducation": 4,
+        "maxSkills": 20,
+        "maxProjects": 6,
+        "recommendedSections": ["personalInfo", "experience", "skills", "education", "projects"],
+        "minSections": 3
+      },
+      "features": [
+        "Gradient header design",
+        "Icon integration for sections",
+        "Skills visualization bars",
+        "Project showcase with links",
+        "Clean modern typography",
+        "Mobile-responsive preview"
+      ],
+      "accessibility": {
+        "wcag": "AA",
+        "colorContrast": "4.5:1",
+        "screenReaderFriendly": true
+      }
+    },
+
+    "classic": {
+      "id": "classic",
+      "name": "Classic Professional",
+      "description": "Traditional, conservative design perfect for corporate environments. Emphasizes experience and professionalism.",
+      "category": "classic",
+      "suitability": {
+        "industries": [
+          "Finance",
+          "Legal",
+          "Consulting",
+          "Healthcare",
+          "Government",
+          "Insurance",
+          "Real Estate"
+        ],
+        "roles": [
+          "Business Analyst",
+          "Accountant",
+          "Lawyer",
+          "Consultant",
+          "Manager",
+          "Financial Advisor",
+          "HR Professional"
+        ],
+        "seniority": ["mid", "senior", "executive"],
+        "bestFor": "Experienced professionals in traditional corporate industries where conservative presentation is valued"
+      },
+      "density": "high",
+      "atsMetadata": {
+        "safety": "excellent",
+        "parseability": 98,
+        "plainTextFallback": true,
+        "knownIssues": [],
+        "recommendations": [
+          "Optimal for ATS parsing",
+          "Standard formatting throughout",
+          "High keyword compatibility"
+        ]
+      },
+      "layoutConfig": {
+        "type": "single-column",
+        "headerStyle": "simple",
+        "sectionSpacing": "compact",
+        "marginsPx": {"top": 50, "right": 50, "bottom": 50, "left": 50},
+        "fontSizes": {"h1": 24, "h2": 14, "body": 10.5},
+        "lineHeight": 1.4
+      },
+      "allowedOverrides": {
+        "fonts": ["Times New Roman", "Georgia", "Garamond", "Crimson Text", "Libre Baskerville"],
+        "accentColors": ["#1f2937", "#374151", "#4b5563", "#6b7280", "#111827", "#000000"],
+        "sectionOrder": true,
+        "hideEmptySections": true,
+        "compactMode": true
+      },
+      "constraints": {
+        "maxExperience": 10,
+        "maxEducation": 5,
+        "maxSkills": 15,
+        "maxProjects": 4,
+        "recommendedSections": ["personalInfo", "experience", "education", "skills", "certifications"],
+        "minSections": 3
+      },
+      "features": [
+        "Clean traditional typography",
+        "Professional layout",
+        "Emphasis on work experience",
+        "Conservative color palette",
+        "High information density",
+        "Executive-ready formatting"
+      ],
+      "accessibility": {
+        "wcag": "AAA",
+        "colorContrast": "7:1",
+        "screenReaderFriendly": true
+      }
+    },
+
+    "creative": {
+      "id": "creative",
+      "name": "Creative Portfolio",
+      "description": "Bold, artistic design showcasing creativity and visual projects. Ideal for portfolios and creative professionals.",
+      "category": "creative",
+      "suitability": {
+        "industries": [
+          "Design",
+          "Advertising",
+          "Media",
+          "Entertainment",
+          "Fashion",
+          "Photography",
+          "Animation"
+        ],
+        "roles": [
+          "Graphic Designer",
+          "Artist",
+          "Photographer",
+          "Creative Director",
+          "UX Designer",
+          "Illustrator",
+          "Art Director"
+        ],
+        "seniority": ["entry", "mid", "senior"],
+        "bestFor": "Creative professionals with strong visual portfolios who need to showcase projects prominently"
+      },
+      "density": "low",
+      "atsMetadata": {
+        "safety": "medium",
+        "parseability": 75,
+        "plainTextFallback": true,
+        "knownIssues": [
+          "Complex layout may confuse some ATS systems",
+          "Visual elements not parseable"
+        ],
+        "recommendations": [
+          "Always provide ATS-safe variant",
+          "Include portfolio links in plain text",
+          "Use standard headings in ATS version"
+        ]
+      },
+      "layoutConfig": {
+        "type": "two-column",
+        "headerStyle": "visual",
+        "sectionSpacing": "wide",
+        "marginsPx": {"top": 30, "right": 30, "bottom": 30, "left": 30},
+        "fontSizes": {"h1": 32, "h2": 18, "body": 11},
+        "lineHeight": 1.6
+      },
+      "allowedOverrides": {
+        "fonts": ["Montserrat", "Playfair Display", "Oswald", "Poppins", "Raleway"],
+        "accentColors": ["#8b5cf6", "#06b6d4", "#f97316", "#ec4899", "#84cc16", "#f43f5e"],
+        "sectionOrder": true,
+        "hideEmptySections": true,
+        "compactMode": false
+      },
+      "constraints": {
+        "maxExperience": 6,
+        "maxEducation": 3,
+        "maxSkills": 25,
+        "maxProjects": 8,
+        "recommendedSections": ["personalInfo", "projects", "skills", "experience", "education"],
+        "minSections": 3
+      },
+      "features": [
+        "Visual project gallery",
+        "Creative typography choices",
+        "Color-rich design elements",
+        "Portfolio-first layout",
+        "Project image support",
+        "Two-column layout"
+      ],
+      "accessibility": {
+        "wcag": "AA",
+        "colorContrast": "4.5:1",
+        "screenReaderFriendly": true
+      }
+    },
+
+    "minimal": {
+      "id": "minimal",
+      "name": "Minimal Clean",
+      "description": "Ultra-clean, minimalist design focusing on content over decoration. Perfect for content-heavy resumes.",
+      "category": "minimal",
+      "suitability": {
+        "industries": [
+          "Technology",
+          "Research",
+          "Academia",
+          "Publishing",
+          "Consulting",
+          "Non-profit",
+          "Engineering"
+        ],
+        "roles": [
+          "Developer",
+          "Researcher",
+          "Academic",
+          "Writer",
+          "Analyst",
+          "Scientist",
+          "Engineer"
+        ],
+        "seniority": ["entry", "mid", "senior"],
+        "bestFor": "Professionals with extensive experience or technical backgrounds who prefer clean, distraction-free presentation"
+      },
+      "density": "variable",
+      "atsMetadata": {
+        "safety": "excellent",
+        "parseability": 97,
+        "plainTextFallback": true,
+        "knownIssues": [],
+        "recommendations": [
+          "Excellent ATS compatibility",
+          "Clean structure for parsing",
+          "High keyword visibility"
+        ]
+      },
+      "layoutConfig": {
+        "type": "single-column",
+        "headerStyle": "minimal",
+        "sectionSpacing": "wide",
+        "marginsPx": {"top": 60, "right": 60, "bottom": 60, "left": 60},
+        "fontSizes": {"h1": 26, "h2": 15, "body": 10.5},
+        "lineHeight": 1.7
+      },
+      "allowedOverrides": {
+        "fonts": ["Source Sans Pro", "Nunito", "Work Sans", "IBM Plex Sans", "Inter"],
+        "accentColors": ["#000000", "#374151", "#6b7280", "#059669", "#dc2626", "#0284c7"],
+        "sectionOrder": true,
+        "hideEmptySections": true,
+        "compactMode": false
+      },
+      "constraints": {
+        "maxExperience": 12,
+        "maxEducation": 6,
+        "maxSkills": 18,
+        "maxProjects": 5,
+        "recommendedSections": ["personalInfo", "experience", "education", "skills", "publications"],
+        "minSections": 3
+      },
+      "features": [
+        "Minimal visual styling",
+        "Typography-focused design",
+        "Clean generous spacing",
+        "Content-first approach",
+        "Excellent readability",
+        "Flexible content capacity"
+      ],
+      "accessibility": {
+        "wcag": "AAA",
+        "colorContrast": "7:1",
+        "screenReaderFriendly": true
+      }
+    },
+
+    "executive": {
+      "id": "executive",
+      "name": "Executive Leadership",
+      "description": "Sophisticated design for senior-level professionals and executives. Emphasizes leadership achievements and strategic impact.",
+      "category": "executive",
+      "suitability": {
+        "industries": [
+          "Finance",
+          "Consulting",
+          "Healthcare",
+          "Manufacturing",
+          "Real Estate",
+          "Corporate",
+          "Private Equity"
+        ],
+        "roles": [
+          "CEO",
+          "VP",
+          "Director",
+          "Senior Manager",
+          "Executive",
+          "C-Suite",
+          "Board Member"
+        ],
+        "seniority": ["senior", "executive", "c-suite"],
+        "bestFor": "Senior executives and leaders with 10+ years experience requiring premium, sophisticated presentation"
+      },
+      "density": "medium-high",
+      "atsMetadata": {
+        "safety": "high",
+        "parseability": 92,
+        "plainTextFallback": true,
+        "knownIssues": [],
+        "recommendations": [
+          "Sidebar layout may need ATS variant",
+          "Emphasize leadership keywords",
+          "Include board experience clearly"
+        ]
+      },
+      "layoutConfig": {
+        "type": "sidebar",
+        "headerStyle": "executive",
+        "sectionSpacing": "medium",
+        "marginsPx": {"top": 45, "right": 45, "bottom": 45, "left": 45},
+        "fontSizes": {"h1": 26, "h2": 15, "body": 10.5},
+        "lineHeight": 1.5
+      },
+      "allowedOverrides": {
+        "fonts": ["Merriweather", "Libre Baskerville", "Crimson Pro", "Source Serif Pro", "Lora"],
+        "accentColors": ["#1e40af", "#7c2d12", "#166534", "#92400e", "#1f2937", "#0f172a"],
+        "sectionOrder": true,
+        "hideEmptySections": true,
+        "compactMode": false
+      },
+      "constraints": {
+        "maxExperience": 15,
+        "maxEducation": 4,
+        "maxSkills": 12,
+        "maxProjects": 3,
+        "recommendedSections": ["personalInfo", "experience", "education", "leadership", "skills"],
+        "minSections": 3
+      },
+      "features": [
+        "Executive styling",
+        "Achievement focus",
+        "Leadership emphasis",
+        "Premium professional layout",
+        "Sidebar for key info",
+        "Sophisticated typography"
+      ],
+      "accessibility": {
+        "wcag": "AA",
+        "colorContrast": "4.5:1",
+        "screenReaderFriendly": true
+      }
+    }
+  },
+
+  "metadata": {
+    "totalTemplates": 5,
+    "categories": ["modern", "classic", "creative", "minimal", "executive"],
+    "atsSafetyLevels": {
+      "excellent": ["classic", "minimal"],
+      "high": ["modern", "executive"],
+      "medium": ["creative"]
+    },
+    "densityLevels": {
+      "low": ["creative"],
+      "medium": ["modern"],
+      "medium-high": ["executive"],
+      "high": ["classic"],
+      "variable": ["minimal"]
+    },
+    "recommendedFor": {
+      "entry-level": ["modern", "minimal", "creative"],
+      "mid-level": ["modern", "classic", "creative", "minimal"],
+      "senior-level": ["classic", "executive", "minimal"],
+      "executive": ["executive", "classic"]
+    }
+  }
+}

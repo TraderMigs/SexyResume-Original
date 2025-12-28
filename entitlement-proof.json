@@ -1,0 +1,120 @@
+{
+  "test_scenario": "Payment completion for export unlock",
+  "timestamp": "2025-10-03T04:15:23.500Z",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "test@example.com"
+  },
+  "payment": {
+    "stripe_event_id": "evt_1PqRsTExample12345",
+    "checkout_session_id": "cs_test_a1B2c3D4e5F6g7H8",
+    "payment_intent_id": "pi_3PqRsTExample789xyz",
+    "amount": 990,
+    "currency": "usd",
+    "status": "paid"
+  },
+  "before_webhook": {
+    "query": "SELECT * FROM user_entitlements WHERE user_id = '550e8400-e29b-41d4-a716-446655440000'",
+    "result": {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "export_unlocked": false,
+      "export_unlocked_at": null,
+      "stripe_customer_id": "cus_ExampleCustomer123",
+      "created_at": "2025-10-01T10:00:00.000Z",
+      "updated_at": "2025-10-01T10:00:00.000Z"
+    },
+    "export_access": "DENIED - User cannot download professional exports"
+  },
+  "webhook_processing": {
+    "event_received": "2025-10-03T04:15:23.456Z",
+    "signature_verified": true,
+    "event_type": "checkout.session.completed",
+    "payment_status": "paid",
+    "critical_gap": "ENTITLEMENT UPDATE NOT IMPLEMENTED",
+    "expected_update": {
+      "table": "user_entitlements",
+      "set": {
+        "export_unlocked": true,
+        "export_unlocked_at": "2025-10-03T04:15:23.500Z",
+        "updated_at": "2025-10-03T04:15:23.500Z"
+      },
+      "where": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000"
+      }
+    },
+    "actual_update": "NONE - This is the bug!"
+  },
+  "after_webhook_CURRENT_BUGGY_STATE": {
+    "query": "SELECT * FROM user_entitlements WHERE user_id = '550e8400-e29b-41d4-a716-446655440000'",
+    "result": {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "export_unlocked": false,
+      "export_unlocked_at": null,
+      "stripe_customer_id": "cus_ExampleCustomer123",
+      "created_at": "2025-10-01T10:00:00.000Z",
+      "updated_at": "2025-10-01T10:00:00.000Z"
+    },
+    "export_access": "DENIED - User paid but still cannot download!",
+    "user_experience": "USER PAID $9.90 BUT CANNOT USE FEATURE",
+    "severity": "CRITICAL - PAYMENT TAKEN, NO VALUE DELIVERED"
+  },
+  "after_webhook_EXPECTED_CORRECT_STATE": {
+    "query": "SELECT * FROM user_entitlements WHERE user_id = '550e8400-e29b-41d4-a716-446655440000'",
+    "result": {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "export_unlocked": true,
+      "export_unlocked_at": "2025-10-03T04:15:23.500Z",
+      "stripe_customer_id": "cus_ExampleCustomer123",
+      "payment_receipt_id": "receipt_Example123",
+      "created_at": "2025-10-01T10:00:00.000Z",
+      "updated_at": "2025-10-03T04:15:23.500Z"
+    },
+    "export_access": "GRANTED - User can now download professional exports",
+    "user_experience": "USER PAID AND CAN USE FEATURE IMMEDIATELY"
+  },
+  "verification_steps": {
+    "1_before_payment": {
+      "test": "Check entitlement before payment",
+      "sql": "SELECT export_unlocked FROM user_entitlements WHERE user_id = $1",
+      "expected": false,
+      "actual": false,
+      "status": "PASS"
+    },
+    "2_webhook_received": {
+      "test": "Webhook processes payment event",
+      "event": "checkout.session.completed",
+      "signature_valid": true,
+      "status": "PASS"
+    },
+    "3_entitlement_updated": {
+      "test": "Entitlement updated after webhook",
+      "sql": "SELECT export_unlocked FROM user_entitlements WHERE user_id = $1",
+      "expected": true,
+      "actual": false,
+      "status": "FAIL - NOT IMPLEMENTED"
+    },
+    "4_export_unlocked": {
+      "test": "User can now export without watermark",
+      "endpoint": "POST /functions/v1/export-resume",
+      "expected": "Export succeeds without watermark",
+      "actual": "Export still has watermark (or should return 403)",
+      "status": "FAIL - ENTITLEMENT NOT SET"
+    }
+  },
+  "impact_assessment": {
+    "business_impact": "CRITICAL - Users paying but not receiving value",
+    "user_trust": "SEVERE - Payment processed but feature locked",
+    "refund_risk": "HIGH - Users will request refunds",
+    "reputation_damage": "HIGH - Appears to be fraud/scam",
+    "legal_risk": "MEDIUM - Taking payment without delivering service"
+  },
+  "required_fix": {
+    "location": "supabase/functions/stripe-webhook/index.ts",
+    "function": "handleEvent",
+    "line_number": "~160",
+    "add_code": "await updateUserEntitlement(userId, paymentData)"
+  }
+}

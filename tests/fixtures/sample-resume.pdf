@@ -1,0 +1,108 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+/Resources <<
+/Font <<
+/F1 5 0 R
+>>
+>>
+>>
+endobj
+4 0 obj
+<<
+/Length 287
+>>
+stream
+BT
+/F1 24 Tf
+50 750 Td
+(Jane Smith) Tj
+0 -30 Td
+/F1 12 Tf
+(jane.smith@example.com | +1 555-123-4567) Tj
+0 -40 Td
+/F1 16 Tf
+(PROFESSIONAL SUMMARY) Tj
+0 -25 Td
+/F1 11 Tf
+(Experienced software engineer with 5+ years in web development.) Tj
+0 -15 Td
+(Specialized in React, TypeScript, and cloud infrastructure.) Tj
+0 -40 Td
+/F1 16 Tf
+(WORK EXPERIENCE) Tj
+0 -25 Td
+/F1 12 Tf
+(Senior Software Engineer) Tj
+0 -15 Td
+/F1 11 Tf
+(TechCorp Inc - San Francisco, CA) Tj
+0 -15 Td
+(January 2021 - Present) Tj
+0 -20 Td
+(- Led development of microservices architecture) Tj
+0 -15 Td
+(- Mentored team of 5 junior engineers) Tj
+0 -15 Td
+(- Improved system performance by 40%) Tj
+0 -40 Td
+/F1 16 Tf
+(EDUCATION) Tj
+0 -25 Td
+/F1 12 Tf
+(Bachelor of Science in Computer Science) Tj
+0 -15 Td
+/F1 11 Tf
+(University of California, Berkeley - 2019) Tj
+0 -15 Td
+(GPA: 3.8/4.0) Tj
+0 -40 Td
+/F1 16 Tf
+(SKILLS) Tj
+0 -25 Td
+/F1 11 Tf
+(TypeScript, React, Node.js, PostgreSQL, AWS, Docker, Kubernetes) Tj
+ET
+endstream
+endobj
+5 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+xref
+0 6
+0000000000 65535 f
+0000000015 00000 n
+0000000068 00000 n
+0000000125 00000 n
+0000000281 00000 n
+0000000620 00000 n
+trailer
+<<
+/Size 6
+/Root 1 0 R
+>>
+startxref
+697
+%%EOF

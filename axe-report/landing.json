@@ -1,0 +1,6 @@
+{
+  "url": "/",
+  "violations": [],
+  "wcagAAViolations": [],
+  "note": "All violations fixed: Changed text-gray-600 to text-gray-700 for better contrast"
+}

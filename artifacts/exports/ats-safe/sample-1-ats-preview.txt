@@ -1,0 +1,69 @@
+PREVIEW VERSION - SEXYRESUME.COM
+
+Sarah Chen
+EMAIL: sarah.chen@email.com
+PHONE: +1 (555) 123-4567
+LOCATION: San Francisco, CA
+
+PROFESSIONAL SUMMARY:
+Full-stack software engineer with 8+ years of experience building scalable web applications. Expertise in React, Node.js, and cloud architecture. Passionate about creating elegant solutions to complex problems and mentoring junior developers.
+
+CORE COMPETENCIES:
+JavaScript, TypeScript, React, Node.js, PostgreSQL, AWS, Docker, GraphQL, Leadership, Agile/Scrum
+
+PROFESSIONAL EXPERIENCE:
+
+POSITION 1:
+JOB TITLE: Senior Software Engineer
+COMPANY NAME: TechCorp Inc
+EMPLOYMENT DATES: 2020-01 to Present
+JOB DESCRIPTION: Lead development of microservices architecture serving 10M+ users
+KEY ACHIEVEMENTS:
+- Reduced API response time by 60% through optimization and caching strategies
+- Mentored team of 5 engineers in modern React patterns and best practices
+- Implemented CI/CD pipeline reducing deployment time from hours to minutes
+- Designed and built real-time notification system handling 1M+ events daily
+
+POSITION 2:
+JOB TITLE: Software Engineer
+COMPANY NAME: StartupXYZ
+EMPLOYMENT DATES: 2018-03 to 2019-12
+JOB DESCRIPTION: Full-stack development for B2B SaaS platform
+KEY ACHIEVEMENTS:
+- Built customer dashboard processing 100K+ data points in real-time
+- Integrated payment processing system handling $2M+ in transactions
+- Developed automated testing framework increasing code coverage to 90%
+
+POSITION 3:
+JOB TITLE: Junior Developer
+COMPANY NAME: WebAgency Co
+EMPLOYMENT DATES: 2016-06 to 2018-02
+JOB DESCRIPTION: Frontend development for client websites and web applications
+KEY ACHIEVEMENTS:
+- Created responsive designs for 20+ client websites
+- Improved page load times by 40% through optimization techniques
+- Collaborated with design team to implement pixel-perfect UIs
+
+EDUCATION:
+
+EDUCATION 1:
+DEGREE TYPE: Bachelor of Science
+FIELD OF STUDY: Computer Science
+INSTITUTION NAME: University of California, Berkeley
+GRADUATION DATE: 2016-05
+GPA: 3.8
+HONORS: Magna Cum Laude, Dean's List
+
+RELEVANT PROJECTS:
+
+PROJECT 1:
+PROJECT NAME: Open Source Contributions
+PROJECT DESCRIPTION: Active contributor to various open source projects
+TECHNOLOGIES USED: React, TypeScript, Node.js
+
+PROJECT 2:
+PROJECT NAME: Personal Blog & Portfolio
+PROJECT DESCRIPTION: Technical blog with 50K+ monthly readers
+TECHNOLOGIES USED: Next.js, MDX, Tailwind CSS
+
+CREATED WITH SEXYRESUME.COM

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dr. Emily Zhang - Resume</title>
+  <style>
+    @page { size: A4; margin: 0.5in; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; font-size: 11pt; }
+    .header { background: linear-gradient(135deg, #d946ef, #0ba5d9); color: white; padding: 30px; text-align: center; }
+    .name { font-size: 28pt; font-weight: 700; margin-bottom: 10px; }
+    .contact { font-size: 10pt; }
+    .section { margin: 20px 0; }
+    .section-title { font-size: 16pt; font-weight: 600; color: #d946ef; border-bottom: 2px solid #d946ef; padding-bottom: 5px; }
+    .item { margin: 15px 0 15px 15px; border-left: 3px solid rgba(217, 70, 239, 0.2); padding-left: 15px; }
+    .item-title { font-size: 12pt; font-weight: 600; }
+    .item-subtitle { color: #d946ef; font-weight: 500; }
+    .item-date { color: #666; font-size: 9pt; }
+    ul { margin: 5px 0; padding-left: 20px; }
+    
+    .watermark-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 120px;
+      color: rgba(217, 70, 239, 0.08);
+      z-index: 1000;
+      pointer-events: none;
+      font-weight: bold;
+      user-select: none;
+    }
+  
+  </style>
+</head>
+<body>
+  <div class="watermark-overlay">PREVIEW</div>
+  <header class="header">
+    <h1 class="name">Dr. Emily Zhang</h1>
+    <div class="contact">emily.zhang@data.com | +1 (555) 345-6789 | Seattle, WA</div>
+  </header>
+  <div class="content">
+    <div class="section">
+      <p>Data scientist with PhD in Machine Learning and 5+ years applying statistical methods and ML algorithms to solve business problems. Expert in Python, R, and cloud-based data pipelines. Published researcher with focus on practical applications of AI.</p>
+    </div>
+    <div class="section">
+      <h2 class="section-title">Work Experience</h2>
+      
+        <div class="item">
+          <div class="item-title">Senior Data Scientist</div>
+          <div class="item-subtitle">DataCorp</div>
+          <div class="item-date">2022-03 - Present</div>
+          <p>Leading data science initiatives for predictive analytics</p>
+          <ul>
+            <li>Built ML model increasing sales forecast accuracy by 25%</li><li>Developed recommendation engine driving $5M in additional revenue</li><li>Created automated data pipelines processing 10TB+ daily</li><li>Published 3 papers on applied machine learning in production systems</li>
+          </ul>
+        </div>
+      
+        <div class="item">
+          <div class="item-title">Data Scientist</div>
+          <div class="item-subtitle">AI Research Lab</div>
+          <div class="item-date">2019-06 - 2022-02</div>
+          <p>Research and development of novel ML algorithms</p>
+          <ul>
+            <li>Developed computer vision model with 95% accuracy</li><li>Collaborated on NLP research resulting in 2 conference publications</li><li>Mentored 4 PhD students on practical ML implementation</li>
+          </ul>
+        </div>
+      
+    </div>
+    <div class="section">
+      <h2 class="section-title">Education</h2>
+      
+        <div class="item">
+          <div class="item-title">PhD in Machine Learning</div>
+          <div class="item-subtitle">Stanford University</div>
+          <div class="item-date">2015-09 - 2019-05 | GPA: 4.0</div>
+          <p>Outstanding Dissertation Award</p>
+        </div>
+      
+        <div class="item">
+          <div class="item-title">Master of Science in Computer Science</div>
+          <div class="item-subtitle">MIT</div>
+          <div class="item-date">2013-09 - 2015-05 | GPA: 3.95</div>
+          <p>Graduate Research Fellowship</p>
+        </div>
+      
+    </div>
+    <div class="section">
+      <h2 class="section-title">Skills</h2>
+      <p>Python, R, TensorFlow, PyTorch, SQL, Spark, AWS, Research, Technical Writing</p>
+    </div>
+    
+      <div class="section">
+        <h2 class="section-title">Projects</h2>
+        
+          <div class="item">
+            <div class="item-title">Open Source ML Library</div>
+            <p>Popular Python library for time series forecasting</p>
+            <p>Technologies: Python, NumPy, Pandas</p>
+          </div>
+        
+      </div>
+    
+  </div>
+</body>
+</html>

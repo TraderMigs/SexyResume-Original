@@ -1,0 +1,574 @@
+// Template Recommendation Snapshot Tests
+// Generated: 2025-10-03T16:13:33.368Z
+//
+// This snapshot validates that:
+// 1. Recommender returns exactly top 2 templates
+// 2. Rationale strings explain scoring based on content shape, industry, seniority
+// 3. All templates have ATS-safe variants (plain text fallback)
+// 4. No layout breaks across diverse content profiles
+// 5. ATS parseability ranges from 75% (creative) to 98% (classic)
+
+export const RECOMMENDATION_SNAPSHOTS = [
+  {
+    "sample": "1. Entry-level software engineer with projects",
+    "resume": {
+      "industry": "Technology",
+      "role": "Software Engineer",
+      "experienceLevel": "entry",
+      "projectCount": 3,
+      "experienceCount": 1,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "modern",
+        "templateName": "Modern Professional",
+        "score": 85,
+        "reasons": [
+          "Optimized for Technology professionals with 95% ATS compatibility",
+          "Project-focused layout showcases your 3 projects effectively (max: 6)",
+          "Tailored for entry-level candidates (0-2 years)",
+          "Clean modern aesthetic appeals to tech recruiters with high ATS safety rating"
+        ],
+        "atsMetadata": {
+          "parseability": 95,
+          "safety": "high"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "minimal",
+        "templateName": "Minimal Clean",
+        "score": 72,
+        "reasons": [
+          "Optimized for Technology professionals with 97% ATS compatibility",
+          "Tailored for entry-level candidates (0-2 years)",
+          "Excellent ATS compatibility (97% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 97,
+          "safety": "excellent"
+        }
+      }
+    ],
+    "rationale": "Modern template ranks first due to strong tech industry alignment (30pts), entry-level suitability (20pts), and project-heavy content structure (15pts). Minimal is second choice with excellent ATS parseability but less visual appeal for tech roles."
+  },
+  {
+    "sample": "2. Senior financial analyst with traditional background",
+    "resume": {
+      "industry": "Finance",
+      "role": "Financial Analyst",
+      "experienceLevel": "senior",
+      "projectCount": 0,
+      "experienceCount": 2,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "classic",
+        "templateName": "Classic Professional",
+        "score": 88,
+        "reasons": [
+          "Optimized for Finance professionals with 98% ATS compatibility",
+          "Specifically designed for Financial Advisor roles in Finance and Legal",
+          "Experience-first structure emphasizes your 2 roles with high information density",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Excellent ATS compatibility (98% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 98,
+          "safety": "excellent"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "executive",
+        "templateName": "Executive Leadership",
+        "score": 75,
+        "reasons": [
+          "Optimized for Finance professionals with 92% ATS compatibility",
+          "Specifically designed for Executive roles in Finance and Consulting",
+          "Experience-first structure emphasizes your 2 roles with medium-high information density",
+          "Tailored for senior-level candidates (5-10 years)"
+        ],
+        "atsMetadata": {
+          "parseability": 92,
+          "safety": "high"
+        }
+      }
+    ],
+    "rationale": "Classic template wins with perfect Finance industry match (30pts), role alignment (25pts), senior seniority fit (20pts), and industry-leading 98% ATS parseability. Conservative design ideal for corporate finance environments."
+  },
+  {
+    "sample": "3. Creative director with extensive portfolio",
+    "resume": {
+      "industry": "Design",
+      "role": "Creative Director",
+      "experienceLevel": "senior",
+      "projectCount": 4,
+      "experienceCount": 2,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "creative",
+        "templateName": "Creative Portfolio",
+        "score": 90,
+        "reasons": [
+          "Optimized for Design professionals with 75% ATS compatibility",
+          "Specifically designed for Creative Director roles in Design and Advertising",
+          "Project-focused layout showcases your 4 projects effectively (max: 8)",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Visual portfolio layout with two-column design highlights creative work"
+        ],
+        "atsMetadata": {
+          "parseability": 75,
+          "safety": "medium"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "modern",
+        "templateName": "Modern Professional",
+        "score": 70,
+        "reasons": [
+          "Optimized for Design professionals with 95% ATS compatibility",
+          "Specifically designed for Designer roles in Technology and Startups",
+          "Project-focused layout showcases your 4 projects effectively (max: 6)",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Excellent ATS compatibility (95% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 95,
+          "safety": "high"
+        }
+      }
+    ],
+    "rationale": "Creative template dominates with Design industry match (30pts), Creative Director role fit (25pts), creative content detection (15pts), and portfolio-first layout (15pts). Lower ATS parseability (75%) offset by visual portfolio needs; ATS-safe variant always provided."
+  },
+  {
+    "sample": "4. Research scientist with publications",
+    "resume": {
+      "industry": "Research",
+      "role": "Research Scientist",
+      "experienceLevel": "senior",
+      "projectCount": 1,
+      "experienceCount": 2,
+      "skillCount": 7
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "minimal",
+        "templateName": "Minimal Clean",
+        "score": 78,
+        "reasons": [
+          "Optimized for Research professionals with 97% ATS compatibility",
+          "Specifically designed for Researcher roles in Technology and Research",
+          "Experience-first structure emphasizes your 2 roles with variable information density",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Excellent ATS compatibility (97% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 97,
+          "safety": "excellent"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "classic",
+        "templateName": "Classic Professional",
+        "score": 68,
+        "reasons": [
+          "Experience-first structure emphasizes your 2 roles with high information density",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Traditional 98% parseable format ideal for corporate environments",
+          "Excellent ATS compatibility (98% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 98,
+          "safety": "excellent"
+        }
+      }
+    ],
+    "rationale": "Minimal template leads with Research industry recognition, senior-level fit, and content-first approach perfect for academic/research positions. Excellent 97% ATS parseability with generous spacing for publications."
+  },
+  {
+    "sample": "5. Executive VP of Operations",
+    "resume": {
+      "industry": "Manufacturing",
+      "role": "VP Operations",
+      "experienceLevel": "executive",
+      "projectCount": 0,
+      "experienceCount": 3,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "executive",
+        "templateName": "Executive Leadership",
+        "score": 85,
+        "reasons": [
+          "Experience-first structure emphasizes your 3 roles with medium-high information density",
+          "Tailored for executive-level candidates (10+ years)",
+          "Spacious sidebar layout accommodates 5 skills without crowding"
+        ],
+        "atsMetadata": {
+          "parseability": 92,
+          "safety": "high"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "classic",
+        "templateName": "Classic Professional",
+        "score": 78,
+        "reasons": [
+          "Experience-first structure emphasizes your 3 roles with high information density",
+          "Traditional 98% parseable format ideal for corporate environments",
+          "Excellent ATS compatibility (98% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 98,
+          "safety": "excellent"
+        }
+      }
+    ],
+    "rationale": "Executive template wins with executive-level seniority match (20pts), experience-heavy structure (10pts), and sophisticated sidebar layout. Perfect for C-suite with 92% ATS parseability."
+  },
+  {
+    "sample": "6. Mid-level product manager in tech",
+    "resume": {
+      "industry": "Technology",
+      "role": "Product Manager",
+      "experienceLevel": "mid",
+      "projectCount": 1,
+      "experienceCount": 2,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "modern",
+        "templateName": "Modern Professional",
+        "score": 85,
+        "reasons": [
+          "Optimized for Technology professionals with 95% ATS compatibility",
+          "Specifically designed for Product Manager roles in Technology and Startups",
+          "Experience-first structure emphasizes your 2 roles with medium information density",
+          "Tailored for mid-level candidates (2-5 years)",
+          "Excellent ATS compatibility (95% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 95,
+          "safety": "high"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "minimal",
+        "templateName": "Minimal Clean",
+        "score": 70,
+        "reasons": [
+          "Optimized for Technology professionals with 97% ATS compatibility",
+          "Experience-first structure emphasizes your 2 roles with variable information density",
+          "Tailored for mid-level candidates (2-5 years)",
+          "Excellent ATS compatibility (97% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 97,
+          "safety": "excellent"
+        }
+      }
+    ],
+    "rationale": "Modern template optimal with Technology industry (30pts), Product Manager role (25pts), mid-level seniority (20pts), and tech-friendly design (12pts). High 95% ATS parseability ideal for tech recruiters."
+  },
+  {
+    "sample": "7. Entry-level marketing coordinator",
+    "resume": {
+      "industry": "Marketing",
+      "role": "Marketing Professional",
+      "experienceLevel": "entry",
+      "projectCount": 2,
+      "experienceCount": 1,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "modern",
+        "templateName": "Modern Professional",
+        "score": 80,
+        "reasons": [
+          "Optimized for Digital Marketing professionals with 95% ATS compatibility",
+          "Specifically designed for Marketing Professional roles in Technology and Startups",
+          "Project-focused layout showcases your 2 projects effectively (max: 6)",
+          "Tailored for entry-level candidates (0-2 years)",
+          "Excellent ATS compatibility (95% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 95,
+          "safety": "high"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "creative",
+        "templateName": "Creative Portfolio",
+        "score": 70,
+        "reasons": [
+          "Project-focused layout showcases your 2 projects effectively (max: 8)",
+          "Tailored for entry-level candidates (0-2 years)"
+        ],
+        "atsMetadata": {
+          "parseability": 75,
+          "safety": "medium"
+        }
+      }
+    ],
+    "rationale": "Modern template leads with Marketing industry fit, entry-level suitability (20pts), project showcase capability (15pts), and excellent 95% ATS compatibility. Balanced design for digital marketing roles."
+  },
+  {
+    "sample": "8. Healthcare administrator with traditional background",
+    "resume": {
+      "industry": "Healthcare",
+      "role": "Healthcare Administrator",
+      "experienceLevel": "senior",
+      "projectCount": 0,
+      "experienceCount": 2,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "classic",
+        "templateName": "Classic Professional",
+        "score": 83,
+        "reasons": [
+          "Optimized for Healthcare professionals with 98% ATS compatibility",
+          "Experience-first structure emphasizes your 2 roles with high information density",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Traditional 98% parseable format ideal for corporate environments",
+          "Excellent ATS compatibility (98% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 98,
+          "safety": "excellent"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "executive",
+        "templateName": "Executive Leadership",
+        "score": 75,
+        "reasons": [
+          "Optimized for Healthcare professionals with 92% ATS compatibility",
+          "Experience-first structure emphasizes your 2 roles with medium-high information density",
+          "Tailored for senior-level candidates (5-10 years)"
+        ],
+        "atsMetadata": {
+          "parseability": 92,
+          "safety": "high"
+        }
+      }
+    ],
+    "rationale": "Classic template dominates with Healthcare industry match (30pts), senior-level fit (20pts), conservative design for medical field (10pts), and best-in-class 98% ATS parseability. Ideal for hospital administration."
+  },
+  {
+    "sample": "9. Full-stack developer with balanced experience and projects",
+    "resume": {
+      "industry": "Technology",
+      "role": "Software Developer",
+      "experienceLevel": "mid",
+      "projectCount": 2,
+      "experienceCount": 2,
+      "skillCount": 6
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "modern",
+        "templateName": "Modern Professional",
+        "score": 85,
+        "reasons": [
+          "Optimized for Technology professionals with 95% ATS compatibility",
+          "Specifically designed for Software Engineer roles in Technology and Startups",
+          "Tailored for mid-level candidates (2-5 years)",
+          "Clean modern aesthetic appeals to tech recruiters with high ATS safety rating",
+          "Excellent ATS compatibility (95% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 95,
+          "safety": "high"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "minimal",
+        "templateName": "Minimal Clean",
+        "score": 75,
+        "reasons": [
+          "Optimized for Technology professionals with 97% ATS compatibility",
+          "Specifically designed for Developer roles in Technology and Research",
+          "Tailored for mid-level candidates (2-5 years)",
+          "Excellent ATS compatibility (97% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 97,
+          "safety": "excellent"
+        }
+      }
+    ],
+    "rationale": "Modern template wins with Technology industry (30pts), Software Engineer role alignment (25pts), mid-level seniority (20pts), and technical content detection (12pts). Balanced layout handles equal experience/projects. 95% ATS safe."
+  },
+  {
+    "sample": "10. Consultant with minimal project focus",
+    "resume": {
+      "industry": "Consulting",
+      "role": "Management Consultant",
+      "experienceLevel": "senior",
+      "projectCount": 0,
+      "experienceCount": 2,
+      "skillCount": 5
+    },
+    "recommendations": [
+      {
+        "rank": 1,
+        "templateId": "classic",
+        "templateName": "Classic Professional",
+        "score": 88,
+        "reasons": [
+          "Optimized for Consulting professionals with 98% ATS compatibility",
+          "Specifically designed for Consultant roles in Finance and Legal",
+          "Experience-first structure emphasizes your 2 roles with high information density",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Excellent ATS compatibility (98% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 98,
+          "safety": "excellent"
+        }
+      },
+      {
+        "rank": 2,
+        "templateId": "minimal",
+        "templateName": "Minimal Clean",
+        "score": 75,
+        "reasons": [
+          "Optimized for Consulting professionals with 97% ATS compatibility",
+          "Specifically designed for Analyst roles in Technology and Research",
+          "Experience-first structure emphasizes your 2 roles with variable information density",
+          "Tailored for senior-level candidates (5-10 years)",
+          "Excellent ATS compatibility (97% parseability) ensures your resume gets through applicant tracking systems"
+        ],
+        "atsMetadata": {
+          "parseability": 97,
+          "safety": "excellent"
+        }
+      }
+    ],
+    "rationale": "Classic template leads with Consulting industry match (30pts), Consultant role fit (25pts), senior seniority (20pts), and experience-heavy structure (10pts). Professional design with 98% ATS parseability perfect for consulting firms."
+  }
+];
+
+export const ATS_VALIDATION_RESULTS = [
+  {
+    "templateId": "modern",
+    "templateName": "Modern Professional",
+    "hasATSVariant": true,
+    "parseability": 95,
+    "safetyRating": "high",
+    "layoutType": "single-column",
+    "plainTextFallback": true,
+    "knownIssues": [],
+    "recommendations": [
+      "Use standard section headings",
+      "Avoid complex layouts in ATS variant",
+      "Include keywords in plain text"
+    ],
+    "passed": true
+  },
+  {
+    "templateId": "classic",
+    "templateName": "Classic Professional",
+    "hasATSVariant": true,
+    "parseability": 98,
+    "safetyRating": "excellent",
+    "layoutType": "single-column",
+    "plainTextFallback": true,
+    "knownIssues": [],
+    "recommendations": [
+      "Optimal for ATS parsing",
+      "Standard formatting throughout",
+      "High keyword compatibility"
+    ],
+    "passed": true
+  },
+  {
+    "templateId": "creative",
+    "templateName": "Creative Portfolio",
+    "hasATSVariant": true,
+    "parseability": 75,
+    "safetyRating": "medium",
+    "layoutType": "two-column",
+    "plainTextFallback": true,
+    "knownIssues": [
+      "Complex layout may confuse some ATS systems",
+      "Visual elements not parseable"
+    ],
+    "recommendations": [
+      "Always provide ATS-safe variant",
+      "Include portfolio links in plain text",
+      "Use standard headings in ATS version"
+    ],
+    "passed": true
+  },
+  {
+    "templateId": "minimal",
+    "templateName": "Minimal Clean",
+    "hasATSVariant": true,
+    "parseability": 97,
+    "safetyRating": "excellent",
+    "layoutType": "single-column",
+    "plainTextFallback": true,
+    "knownIssues": [],
+    "recommendations": [
+      "Excellent ATS compatibility",
+      "Clean structure for parsing",
+      "High keyword visibility"
+    ],
+    "passed": true
+  },
+  {
+    "templateId": "executive",
+    "templateName": "Executive Leadership",
+    "hasATSVariant": true,
+    "parseability": 92,
+    "safetyRating": "high",
+    "layoutType": "sidebar",
+    "plainTextFallback": true,
+    "knownIssues": [],
+    "recommendations": [
+      "Sidebar layout may need ATS variant",
+      "Emphasize leadership keywords",
+      "Include board experience clearly"
+    ],
+    "passed": true
+  }
+];
+
+export const SUMMARY = {
+  totalTemplates: 5,
+  passedATSCheck: 5,
+  failedATSCheck: 5,
+  averageParseability: 91.4,
+  safetyDistribution: {
+    excellent: 2,
+    high: 2,
+    medium: 1
+  }
+};

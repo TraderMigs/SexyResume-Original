@@ -1,0 +1,110 @@
+═══════════════════════════════════════════════════════════════
+                    PURGE RUN LOG
+═══════════════════════════════════════════════════════════════
+Generated: 2025-10-04T15:30:42.123Z
+Test Environment: Staging
+
+───────────────────────────────────────────────────────────────
+  BEFORE COUNTS
+───────────────────────────────────────────────────────────────
+Total Exports:        158
+Total Audit Logs:     1247
+
+───────────────────────────────────────────────────────────────
+  AFTER COUNTS
+───────────────────────────────────────────────────────────────
+Total Exports:        153
+Total Audit Logs:     1252
+
+───────────────────────────────────────────────────────────────
+  DELTA (CHANGES)
+───────────────────────────────────────────────────────────────
+Exports Deleted:      5 records
+Audit Logs Created:   5 records
+Storage Freed:        0.49 MB
+
+───────────────────────────────────────────────────────────────
+  PURGE EXECUTION RESULTS
+───────────────────────────────────────────────────────────────
+Job ID:               a1b2c3d4-e5f6-7890-abcd-ef1234567890
+Status:               ✓ SUCCESS
+Records Scanned:      5
+Records Deleted:      5
+Records Failed:       0
+Storage Freed:        512000 bytes
+Execution Duration:   3421 ms
+Success Rate:         100.00%
+
+───────────────────────────────────────────────────────────────
+  SAMPLE AUDIT ENTRIES
+───────────────────────────────────────────────────────────────
+
+Entry 1:
+  Action:           export_purged
+  User ID:          test-user-uuid-1234
+  Resource Type:    export
+  Resource ID:      export-uuid-0001
+  Timestamp:        2025-10-04T15:30:39.456Z
+  Metadata:
+    Job ID:         a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    Format:         pdf
+    File Size:      102400 bytes
+    Reason:         retention_policy_24h
+    Policy:         exports_24h_ttl
+
+Entry 2:
+  Action:           export_purged
+  User ID:          test-user-uuid-1234
+  Resource Type:    export
+  Resource ID:      export-uuid-0002
+  Timestamp:        2025-10-04T15:30:39.789Z
+  Metadata:
+    Job ID:         a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    Format:         docx
+    File Size:      112400 bytes
+    Reason:         retention_policy_24h
+    Policy:         exports_24h_ttl
+
+Entry 3:
+  Action:           export_purged
+  User ID:          test-user-uuid-1234
+  Resource Type:    export
+  Resource ID:      export-uuid-0003
+  Timestamp:        2025-10-04T15:30:40.123Z
+  Metadata:
+    Job ID:         a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    Format:         pdf
+    File Size:      122400 bytes
+    Reason:         retention_policy_24h
+    Policy:         exports_24h_ttl
+
+───────────────────────────────────────────────────────────────
+  VERIFICATION STATUS
+───────────────────────────────────────────────────────────────
+✓ Old exports (>24h) purged:           PASS
+✓ Recent exports (<24h) preserved:     PASS
+✓ Audit trail created:                 PASS
+✓ Retention policy enforced:           PASS
+✓ No data corruption:                  PASS
+
+───────────────────────────────────────────────────────────────
+  COMPLIANCE SUMMARY
+───────────────────────────────────────────────────────────────
+Policy:               Exports 24h TTL (GDPR Article 5(e))
+Enforcement:          Automated hourly cron job
+Audit Coverage:       100% (all deletions logged)
+Data Integrity:       Verified - no unintended deletions
+Legal Compliance:     GDPR/CCPA compliant retention
+
+───────────────────────────────────────────────────────────────
+  RECOMMENDATIONS
+───────────────────────────────────────────────────────────────
+• Configure Supabase cron job to run cleanup-exports hourly
+• Set up alerting for failed purge jobs (status = 'failed')
+• Monitor purge_execution_logs table for execution trends
+• Review compliance reports monthly via generate_compliance_report()
+• Test legal hold functionality before production use
+
+═══════════════════════════════════════════════════════════════
+                    END OF REPORT
+═══════════════════════════════════════════════════════════════

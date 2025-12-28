@@ -1,0 +1,59 @@
+Dr. Emily Zhang
+EMAIL: emily.zhang@data.com
+PHONE: +1 (555) 345-6789
+LOCATION: Seattle, WA
+
+PROFESSIONAL SUMMARY:
+Data scientist with PhD in Machine Learning and 5+ years applying statistical methods and ML algorithms to solve business problems. Expert in Python, R, and cloud-based data pipelines. Published researcher with focus on practical applications of AI.
+
+CORE COMPETENCIES:
+Python, R, TensorFlow, PyTorch, SQL, Spark, AWS, Research, Technical Writing
+
+PROFESSIONAL EXPERIENCE:
+
+POSITION 1:
+JOB TITLE: Senior Data Scientist
+COMPANY NAME: DataCorp
+EMPLOYMENT DATES: 2022-03 to Present
+JOB DESCRIPTION: Leading data science initiatives for predictive analytics
+KEY ACHIEVEMENTS:
+- Built ML model increasing sales forecast accuracy by 25%
+- Developed recommendation engine driving $5M in additional revenue
+- Created automated data pipelines processing 10TB+ daily
+- Published 3 papers on applied machine learning in production systems
+
+POSITION 2:
+JOB TITLE: Data Scientist
+COMPANY NAME: AI Research Lab
+EMPLOYMENT DATES: 2019-06 to 2022-02
+JOB DESCRIPTION: Research and development of novel ML algorithms
+KEY ACHIEVEMENTS:
+- Developed computer vision model with 95% accuracy
+- Collaborated on NLP research resulting in 2 conference publications
+- Mentored 4 PhD students on practical ML implementation
+
+EDUCATION:
+
+EDUCATION 1:
+DEGREE TYPE: PhD
+FIELD OF STUDY: Machine Learning
+INSTITUTION NAME: Stanford University
+GRADUATION DATE: 2019-05
+GPA: 4.0
+HONORS: Outstanding Dissertation Award
+
+EDUCATION 2:
+DEGREE TYPE: Master of Science
+FIELD OF STUDY: Computer Science
+INSTITUTION NAME: MIT
+GRADUATION DATE: 2015-05
+GPA: 3.95
+HONORS: Graduate Research Fellowship
+
+RELEVANT PROJECTS:
+
+PROJECT 1:
+PROJECT NAME: Open Source ML Library
+PROJECT DESCRIPTION: Popular Python library for time series forecasting
+TECHNOLOGIES USED: Python, NumPy, Pandas
+

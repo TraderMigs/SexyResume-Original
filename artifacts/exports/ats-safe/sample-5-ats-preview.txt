@@ -1,0 +1,58 @@
+PREVIEW VERSION - SEXYRESUME.COM
+
+Alex Rodriguez
+EMAIL: alex.rodriguez@email.com
+PHONE: +1 (555) 567-8901
+LOCATION: Boston, MA
+
+PROFESSIONAL SUMMARY:
+Recent computer science graduate with strong foundation in software development and data structures. Completed multiple internships and personal projects demonstrating practical application of technical skills. Eager to contribute to innovative teams and continue learning.
+
+CORE COMPETENCIES:
+Python, Java, JavaScript, React, Git, SQL, Teamwork, Problem Solving
+
+PROFESSIONAL EXPERIENCE:
+
+POSITION 1:
+JOB TITLE: Software Engineering Intern
+COMPANY NAME: TechCompany
+EMPLOYMENT DATES: 2023-06 to 2023-08
+JOB DESCRIPTION: Summer internship developing web applications
+KEY ACHIEVEMENTS:
+- Built feature used by 10K+ users in production
+- Collaborated with senior engineers on code reviews and design discussions
+- Wrote comprehensive unit tests achieving 85% code coverage
+
+POSITION 2:
+JOB TITLE: Teaching Assistant
+COMPANY NAME: Boston University
+EMPLOYMENT DATES: 2022-09 to 2024-05
+JOB DESCRIPTION: TA for Introduction to Computer Science course
+KEY ACHIEVEMENTS:
+- Held weekly office hours helping 30+ students
+- Graded assignments and provided detailed feedback
+- Created supplementary learning materials and code examples
+
+EDUCATION:
+
+EDUCATION 1:
+DEGREE TYPE: Bachelor of Science
+FIELD OF STUDY: Computer Science
+INSTITUTION NAME: Boston University
+GRADUATION DATE: 2024-05
+GPA: 3.6
+HONORS: Dean's List, CS Honors Society
+
+RELEVANT PROJECTS:
+
+PROJECT 1:
+PROJECT NAME: Recipe Sharing App
+PROJECT DESCRIPTION: Full-stack web app for sharing and discovering recipes
+TECHNOLOGIES USED: React, Node.js, MongoDB
+
+PROJECT 2:
+PROJECT NAME: Sorting Algorithm Visualizer
+PROJECT DESCRIPTION: Interactive tool to visualize common sorting algorithms
+TECHNOLOGIES USED: JavaScript, HTML/CSS
+
+CREATED WITH SEXYRESUME.COM
