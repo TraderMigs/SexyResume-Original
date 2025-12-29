@@ -1,5 +1,3 @@
-// Security utilities and validation functions
-
 export interface SecurityConfig {
   maxFileSize: number;
   allowedFileTypes: string[];
@@ -8,13 +6,12 @@ export interface SecurityConfig {
 }
 
 export const SECURITY_CONFIG: SecurityConfig = {
-  maxFileSize: 10 * 1024 * 1024, // 10MB
+  maxFileSize: 10 * 1024 * 1024,
   allowedFileTypes: ['.pdf', '.docx', '.doc', '.txt'],
   maxRequestsPerMinute: 60,
   sessionTimeoutMinutes: 120
 };
 
-// Input sanitization
 export function sanitizeInput(input: string): string {
   if (typeof input !== 'string') return '';
   
@@ -30,35 +27,29 @@ export function sanitizeInput(input: string): string {
     .replace(/data:/gi, '')
     .replace(/vbscript:/gi, '')
     .replace(/on\w+=/gi, '')
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '') // Remove iframe tags
-    .substring(0, 10000); // Limit length
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .substring(0, 10000);
 }
 
-// Enhanced file validation with security checks
 export function validateFileSecure(file: File): { isValid: boolean; error?: string } {
-  // Basic validation first
   const basicValidation = validateFile(file);
   if (!basicValidation.isValid) {
     return basicValidation;
   }
 
-  // Additional security checks
   const fileName = file.name.toLowerCase();
   
-  // Check for suspicious file extensions
   const suspiciousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.vbs', '.js', '.php', '.asp', '.jsp', '.jar', '.com', '.pif'];
   if (suspiciousExtensions.some(ext => fileName.endsWith(ext))) {
     return { isValid: false, error: 'File type not allowed for security reasons' };
   }
 
-  // Check for double extensions (e.g., file.pdf.exe)
   const extensionCount = (file.name.match(/\./g) || []).length;
   if (extensionCount > 1) {
     return { isValid: false, error: 'Files with multiple extensions are not allowed' };
   }
 
-  // Check for suspicious file names
   const suspiciousNames = ['autorun', 'desktop.ini', 'thumbs.db', '.htaccess', 'web.config'];
   if (suspiciousNames.some(name => fileName.includes(name))) {
     return { isValid: false, error: 'File name not allowed' };
@@ -67,9 +58,7 @@ export function validateFileSecure(file: File): { isValid: boolean; error?: stri
   return { isValid: true };
 }
 
-// File validation
 export function validateFile(file: File): { isValid: boolean; error?: string } {
-  // Check file size
   if (file.size > SECURITY_CONFIG.maxFileSize) {
     return {
       isValid: false,
@@ -77,7 +66,6 @@ export function validateFile(file: File): { isValid: boolean; error?: string } {
     };
   }
 
-  // Check file type
   const extension = '.' + file.name.split('.').pop()?.toLowerCase();
   if (!SECURITY_CONFIG.allowedFileTypes.includes(extension)) {
     return {
@@ -86,7 +74,6 @@ export function validateFile(file: File): { isValid: boolean; error?: string } {
     };
   }
 
-  // Check for suspicious file names
   const suspiciousPatterns = [
     /\.exe$/i,
     /\.bat$/i,
@@ -109,7 +96,6 @@ export function validateFile(file: File): { isValid: boolean; error?: string } {
   return { isValid: true };
 }
 
-// URL validation
 export function validateURL(url: string): boolean {
   try {
     const parsed = new URL(url);
@@ -119,25 +105,22 @@ export function validateURL(url: string): boolean {
   }
 }
 
-// Email validation
 export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email) && email.length <= 254;
 }
 
-// Phone validation
 export function validatePhone(phone: string): boolean {
   const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
   return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
 }
 
-// Rate limiting (client-side tracking)
 class RateLimiter {
   private requests: Map<string, number[]> = new Map();
 
   isAllowed(key: string, maxRequests: number = SECURITY_CONFIG.maxRequestsPerMinute): boolean {
     const now = Date.now();
-    const windowStart = now - 60000; // 1 minute window
+    const windowStart = now - 60000;
     
     const userRequests = this.requests.get(key) || [];
     const recentRequests = userRequests.filter(time => time > windowStart);
@@ -159,7 +142,6 @@ class RateLimiter {
 
 export const rateLimiter = new RateLimiter();
 
-// Session security
 export function getSecureSessionConfig() {
   return {
     httpOnly: true,
@@ -169,31 +151,31 @@ export function getSecureSessionConfig() {
   };
 }
 
-// Content Security Policy
 export function getCSPDirectives(): string {
   const directives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://app.posthog.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "script-src 'self' https://js.stripe.com https://app.posthog.com https://*.sentry.io",
+    "style-src 'self' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
     "connect-src 'self' https://*.supabase.co https://api.stripe.com https://app.posthog.com https://*.sentry.io",
     "frame-src https://js.stripe.com",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests"
   ];
   
   return directives.join('; ');
 }
 
-// PII detection and sanitization
 export function containsPII(text: string): boolean {
   const piiPatterns = [
-    /\b\d{3}-\d{2}-\d{4}\b/, // SSN
-    /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/, // Credit card
-    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/, // Email
-    /\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b/ // Phone
+    /\b\d{3}-\d{2}-\d{4}\b/,
+    /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/,
+    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/,
+    /\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b/
   ];
   
   return piiPatterns.some(pattern => pattern.test(text));
@@ -207,7 +189,6 @@ export function sanitizePII(text: string): string {
     .replace(/\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b/g, '***-***-****');
 }
 
-// Audit logging
 export function logSecurityEvent(event: {
   type: 'auth_failure' | 'auth_attempt' | 'suspicious_activity' | 'rate_limit_exceeded' | 'invalid_input' | 'file_upload_rejected' | 'admin_access_attempt';
   details: string;
@@ -223,39 +204,25 @@ export function logSecurityEvent(event: {
     severity: event.severity || 'medium'
   };
 
-  // Log to console (in production, send to secure logging service)
-  if (event.severity === 'critical' || event.severity === 'high') {
-    console.error('CRITICAL SECURITY EVENT:', securityEvent);
-  } else {
-    console.warn('Security Event:', securityEvent);
-  }
-
-  // In production, send to Sentry or dedicated security monitoring service
   if (import.meta.env.PROD && typeof window !== 'undefined') {
-    // Send to monitoring service
     fetch('/api/security-events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(securityEvent)
-    }).catch(error => {
-      console.error('Failed to send security event:', error);
-    });
+    }).catch(() => {});
   }
 }
 
-// Password strength validation
 export function validatePasswordStrength(password: string): { isValid: boolean; error?: string; score: number } {
   let score = 0;
   const issues: string[] = [];
 
-  // Length check
   if (password.length < 12) {
     issues.push('at least 12 characters');
   } else {
     score += 25;
   }
 
-  // Character type checks
   if (!/[A-Z]/.test(password)) {
     issues.push('uppercase letters');
   } else {
@@ -280,7 +247,6 @@ export function validatePasswordStrength(password: string): { isValid: boolean; 
     score += 10;
   }
 
-  // Common password checks
   const commonPasswords = ['password', '123456', 'qwerty', 'admin', 'letmein'];
   if (commonPasswords.some(common => password.toLowerCase().includes(common))) {
     issues.push('avoid common passwords');
