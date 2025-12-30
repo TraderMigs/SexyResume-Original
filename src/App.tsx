@@ -210,7 +210,10 @@ export default function App() {
 
                   <div className="mb-8 flex flex-wrap items-center gap-4">
                     <button
-                      onClick={() => setShowUploadModal(true)}
+                      onClick={() => {
+                        console.log('Upload Resume button clicked! showUploadModal:', showUploadModal);
+                        setShowUploadModal(true);
+                      }}
                       className="flex items-center space-x-2 px-4 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
                     >
                       <Upload className="w-5 h-5" />
