@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AccessibilityProvider } from './components/AccessibilityProvider';
 import { SecurityProvider } from './components/SecurityProvider';
@@ -94,6 +94,16 @@ export default function App() {
     initAnalytics(hasConsent);
   }, [hasConsent]);
 
+  const handleOpenUploadModal = useCallback(() => {
+    console.log('Opening upload modal...');
+    setShowUploadModal(true);
+  }, []);
+
+  const handleCloseUploadModal = useCallback(() => {
+    console.log('Closing upload modal...');
+    setShowUploadModal(false);
+  }, []);
+
   const updatePersonalInfo = (info: PersonalInfo) => {
     const updatedResume = {
       ...resumeData,
@@ -154,7 +164,7 @@ export default function App() {
     saveResume(updatedResume);
   };
 
-  const handleResumeUpload = (uploadedData: Partial<Resume>) => {
+  const handleResumeUpload = useCallback((uploadedData: Partial<Resume>) => {
     const updatedResume = {
       ...resumeData,
       ...uploadedData,
@@ -163,7 +173,7 @@ export default function App() {
     setResumeData(updatedResume);
     saveResume(updatedResume);
     track('resume_uploaded', { hasData: !!uploadedData });
-  };
+  }, [resumeData, saveResume, track]);
 
   const tabs = [
     { id: 'personal' as const, label: 'Personal Info', icon: User },
@@ -175,6 +185,8 @@ export default function App() {
     { id: 'preview' as const, label: 'Preview', icon: Eye },
     { id: 'export' as const, label: 'Export', icon: Download }
   ];
+
+  console.log('App render - showUploadModal:', showUploadModal);
 
   return (
     <ErrorBoundary>
@@ -210,10 +222,7 @@ export default function App() {
 
                   <div className="mb-8 flex flex-wrap items-center gap-4">
                     <button
-                      onClick={() => {
-                        console.log('Upload Resume button clicked! showUploadModal:', showUploadModal);
-                        setShowUploadModal(true);
-                      }}
+                      onClick={handleOpenUploadModal}
                       className="flex items-center space-x-2 px-4 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
                     >
                       <Upload className="w-5 h-5" />
@@ -306,7 +315,7 @@ export default function App() {
                 {showUploadModal && (
                   <ResumeUpload
                     onResumeLoaded={handleResumeUpload}
-                    onClose={() => setShowUploadModal(false)}
+                    onClose={handleCloseUploadModal}
                   />
                 )}
 
