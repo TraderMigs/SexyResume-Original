@@ -31,15 +31,43 @@ export function useResume(): UseResumeReturn {
   // Load from localStorage on mount
   useEffect(() => {
     const savedDraft = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedDraft && !resume) {
+    if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
         setResume(parsed);
       } catch (err) {
         console.error('Failed to load draft from localStorage:', err);
+        // Initialize with empty resume on error
+        initializeEmptyResume();
       }
+    } else {
+      // Initialize with empty resume if no saved draft
+      initializeEmptyResume();
     }
   }, []);
+
+  const initializeEmptyResume = () => {
+    const emptyResume: Resume = {
+      id: '',
+      personalInfo: {
+        fullName: '',
+        email: '',
+        phone: '',
+        location: '',
+        linkedin: '',
+        website: '',
+        summary: ''
+      },
+      experience: [],
+      education: [],
+      skills: [],
+      projects: [],
+      template: 'modern',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    setResume(emptyResume);
+  };
 
   // Load user's resumes when authenticated
   useEffect(() => {
@@ -144,15 +172,36 @@ export function useResume(): UseResumeReturn {
       setSaving(true);
       setError(null);
 
+      // Merge with existing resume data to preserve all fields
+      const mergedResume: Resume = {
+        id: resume?.id || '',
+        personalInfo: resumeData.personalInfo || resume?.personalInfo || {
+          fullName: '',
+          email: '',
+          phone: '',
+          location: '',
+          linkedin: '',
+          website: '',
+          summary: ''
+        },
+        experience: resumeData.experience || resume?.experience || [],
+        education: resumeData.education || resume?.education || [],
+        skills: resumeData.skills || resume?.skills || [],
+        projects: resumeData.projects || resume?.projects || [],
+        template: resumeData.template || resume?.template || 'modern',
+        createdAt: resume?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
       // Save to localStorage immediately (works offline)
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(resumeData));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mergedResume));
       
       // Update local state
-      setResume(resumeData as Resume);
+      setResume(mergedResume);
 
       // If user is authenticated, also save to cloud
       if (session && user) {
-        await saveResumeToCloud(resumeData);
+        await saveResumeToCloud(mergedResume);
       }
     } catch (err: any) {
       setError(err.message);
