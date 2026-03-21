@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,14 +11,11 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 function checkRateLimit(ip: string, maxRequests: number, windowMs: number): boolean {
   const now = Date.now()
   const entry = rateLimitMap.get(ip)
-
   if (!entry || now > entry.resetTime) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs })
     return true
   }
-
   if (entry.count >= maxRequests) return false
-
   entry.count++
   return true
 }
@@ -30,30 +26,15 @@ serve(async (req) => {
   }
 
   const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
-  if (!checkRateLimit(clientIP, 5, 3600000)) {
+  if (!checkRateLimit(clientIP, 10, 3600000)) {
     return new Response(
-      JSON.stringify({ error: 'Rate limit exceeded. You can parse up to 5 resumes per hour.' }),
+      JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '3600' }, status: 429 }
     )
   }
 
   try {
-    if (req.method !== 'POST') {
-      throw new Error('Method not allowed')
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) throw new Error('No authorization header')
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
-    if (authError || !user) throw new Error('Unauthorized')
+    if (req.method !== 'POST') throw new Error('Method not allowed')
 
     const formData = await req.formData()
     const file = formData.get('resume') as File
@@ -110,8 +91,6 @@ async function extractTextFromPDF(file: File): Promise<string> {
   try {
     const arrayBuffer = await file.arrayBuffer()
     const bytes = new Uint8Array(arrayBuffer)
-
-    // Convert PDF bytes to base64 and send to Claude directly as a document
     const base64 = btoa(String.fromCharCode(...bytes))
 
     const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
@@ -133,11 +112,7 @@ async function extractTextFromPDF(file: File): Promise<string> {
             content: [
               {
                 type: 'document',
-                source: {
-                  type: 'base64',
-                  media_type: 'application/pdf',
-                  data: base64,
-                },
+                source: { type: 'base64', media_type: 'application/pdf', data: base64 },
               },
               {
                 type: 'text',
@@ -167,11 +142,8 @@ async function extractTextFromWord(file: File): Promise<string> {
   try {
     const arrayBuffer = await file.arrayBuffer()
     const uint8Array = new Uint8Array(arrayBuffer)
-
-    // DOCX files are ZIP archives — extract the document.xml content
     const text = new TextDecoder('utf-8', { ignoreBOM: true }).decode(uint8Array)
 
-    // Pull text from XML tags
     const xmlMatches = text.match(/<w:t[^>]*>([^<]+)<\/w:t>/g) || []
     let extracted = xmlMatches
       .map(m => m.replace(/<[^>]+>/g, ''))
@@ -180,17 +152,13 @@ async function extractTextFromWord(file: File): Promise<string> {
       .trim()
 
     if (extracted.length < 30) {
-      // Fallback: pull any readable text chunks
       extracted = text
         .replace(/[^\x20-\x7E\n\r\t]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim()
     }
 
-    if (extracted.length < 30) {
-      throw new Error('Could not extract text from Word document')
-    }
-
+    if (extracted.length < 30) throw new Error('Could not extract text from Word document')
     return extracted
 
   } catch (error) {
@@ -210,29 +178,29 @@ Return a JSON object with EXACTLY this structure:
     "fullName": "string",
     "email": "string",
     "phone": "string",
-    "location": "string",
+    "location": "City, State format only — never include job titles or roles here",
     "linkedin": "string or empty string",
     "website": "string or empty string",
     "summary": "string - professional summary or objective if present"
   },
   "experience": [
     {
-      "id": "unique string like exp-1",
+      "id": "exp-1",
       "company": "string",
       "position": "string",
-      "startDate": "YYYY-MM format or best estimate",
-      "endDate": "YYYY-MM format or empty if current",
+      "startDate": "YYYY-MM format",
+      "endDate": "YYYY-MM or empty if current",
       "current": boolean,
-      "description": "string - brief description of role",
+      "description": "string",
       "achievements": ["array of bullet point strings"]
     }
   ],
   "education": [
     {
-      "id": "unique string like edu-1",
+      "id": "edu-1",
       "institution": "string",
       "degree": "string",
-      "field": "string - field of study",
+      "field": "string",
       "startDate": "YYYY-MM or year",
       "endDate": "YYYY-MM or year",
       "gpa": "string or empty",
@@ -241,7 +209,7 @@ Return a JSON object with EXACTLY this structure:
   ],
   "skills": [
     {
-      "id": "unique string like skill-1",
+      "id": "skill-1",
       "name": "string",
       "level": "Beginner or Intermediate or Advanced or Expert",
       "category": "Technical or Soft or Language or Other"
@@ -249,10 +217,10 @@ Return a JSON object with EXACTLY this structure:
   ],
   "projects": [
     {
-      "id": "unique string like proj-1",
+      "id": "proj-1",
       "name": "string",
       "description": "string",
-      "technologies": ["array of tech strings"],
+      "technologies": ["array"],
       "url": "string or empty",
       "startDate": "YYYY-MM or empty",
       "endDate": "YYYY-MM or empty"
@@ -260,11 +228,12 @@ Return a JSON object with EXACTLY this structure:
   ]
 }
 
-Rules:
-- Use empty strings "" for missing text fields, false for missing booleans, empty arrays [] for missing arrays
+CRITICAL RULES:
+- location must ONLY contain city/state/country — never a job title, role, or any other text
 - Do not invent or hallucinate any information
 - Extract only what is actually in the resume
-- Return ONLY the JSON object, no explanation, no markdown, no code fences
+- Use empty strings for missing text fields, false for booleans, empty arrays for arrays
+- Return ONLY the JSON object — no explanation, no markdown, no code fences
 
 Resume text:
 ${text.substring(0, 8000)}`
@@ -292,10 +261,8 @@ ${text.substring(0, 8000)}`
   const content = data.content?.[0]?.text || ''
 
   try {
-    // Strip any accidental markdown fences
     const clean = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-    const parsed = JSON.parse(clean)
-    return validateAndClean(parsed)
+    return validateAndClean(JSON.parse(clean))
   } catch {
     throw new Error('Failed to parse AI response into structured resume data.')
   }
@@ -351,31 +318,17 @@ function validateAndClean(parsed: any) {
 }
 
 function calculateConfidenceScore(parsed: any): number {
-  let score = 0
-  let max = 0
-
-  max += 5
+  let score = 0, max = 11
   if (parsed.personalInfo.fullName) score++
   if (parsed.personalInfo.email) score++
   if (parsed.personalInfo.phone) score++
   if (parsed.personalInfo.location) score++
   if (parsed.personalInfo.summary) score++
-
-  max += 3
-  if (parsed.experience.length > 0) {
-    score++
-    if (parsed.experience.some((e: any) => e.company && e.position)) score++
-    if (parsed.experience.some((e: any) => e.achievements.length > 0)) score++
-  }
-
-  max += 2
-  if (parsed.education.length > 0) {
-    score++
-    if (parsed.education.some((e: any) => e.institution && e.degree)) score++
-  }
-
-  max += 1
+  if (parsed.experience.length > 0) score++
+  if (parsed.experience.some((e: any) => e.company && e.position)) score++
+  if (parsed.experience.some((e: any) => e.achievements.length > 0)) score++
+  if (parsed.education.length > 0) score++
+  if (parsed.education.some((e: any) => e.institution && e.degree)) score++
   if (parsed.skills.length > 0) score++
-
   return Math.min(score / max, 1)
 }
