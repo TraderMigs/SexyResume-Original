@@ -119,6 +119,150 @@ export const TEMPLATE_REGISTRY: Record<string, Template> = {
       recommendedSections: ['personalInfo', 'experience', 'education', 'skills']
     },
     preview: '/templates/executive-preview.jpg'
+  },
+
+  tech: {
+    id: 'tech',
+    name: 'Tech & Developer',
+    description: 'Two-column layout built for engineers — skills front and center, GitHub-ready',
+    category: 'modern',
+    suitedFor: ['Software Engineer', 'Frontend Developer', 'Backend Developer', 'DevOps Engineer', 'Data Scientist'],
+    industries: ['Technology', 'Startups', 'Fintech', 'Gaming', 'Cybersecurity'],
+    features: ['Dark sidebar', 'Skill tags', 'GitHub/portfolio links', 'Tech-stack display'],
+    customizations: {
+      fonts: ['JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Inter'],
+      accentColors: ['#6366f1', '#0ea5e9', '#10b981', '#f97316', '#ec4899'],
+      sectionOrder: true,
+      layout: 'two-column'
+    },
+    constraints: {
+      maxExperience: 8,
+      maxEducation: 3,
+      maxSkills: 30,
+      maxProjects: 8,
+      recommendedSections: ['personalInfo', 'skills', 'experience', 'projects', 'education']
+    },
+    preview: '/templates/tech-preview.jpg'
+  },
+
+  healthcare: {
+    id: 'healthcare',
+    name: 'Healthcare & Nursing',
+    description: 'Credential-forward layout built for medical professionals and nurses',
+    category: 'classic',
+    suitedFor: ['Registered Nurse', 'Medical Assistant', 'Physical Therapist', 'Doctor', 'Healthcare Administrator'],
+    industries: ['Healthcare', 'Hospitals', 'Clinics', 'Pharmaceuticals', 'Medical Devices'],
+    features: ['Credentials highlight', 'Certifications section', 'Clinical experience focus', 'Clean professional layout'],
+    customizations: {
+      fonts: ['Georgia', 'Cambria', 'Palatino', 'Times New Roman'],
+      accentColors: ['#0369a1', '#0891b2', '#059669', '#7c3aed', '#1e40af'],
+      sectionOrder: true,
+      layout: 'single-column'
+    },
+    constraints: {
+      maxExperience: 10,
+      maxEducation: 6,
+      maxSkills: 20,
+      maxProjects: 3,
+      recommendedSections: ['personalInfo', 'experience', 'education', 'skills']
+    },
+    preview: '/templates/healthcare-preview.jpg'
+  },
+
+  academic: {
+    id: 'academic',
+    name: 'Academic & Research',
+    description: 'Publication-ready CV format for academics, researchers and PhD candidates',
+    category: 'classic',
+    suitedFor: ['Professor', 'Researcher', 'PhD Candidate', 'Postdoc', 'Academic'],
+    industries: ['Academia', 'Research', 'Universities', 'Think Tanks', 'Government Research'],
+    features: ['Publications section', 'Research focus', 'Serif typography', 'Conference & grants'],
+    customizations: {
+      fonts: ['Garamond', 'Times New Roman', 'Palatino', 'Book Antiqua'],
+      accentColors: ['#1e3a5f', '#7c2d12', '#166534', '#4a1942', '#1f2937'],
+      sectionOrder: true,
+      layout: 'single-column'
+    },
+    constraints: {
+      maxExperience: 15,
+      maxEducation: 8,
+      maxSkills: 20,
+      maxProjects: 10,
+      recommendedSections: ['personalInfo', 'education', 'experience', 'skills', 'projects']
+    },
+    preview: '/templates/academic-preview.jpg'
+  },
+
+  entrylevel: {
+    id: 'entrylevel',
+    name: 'Entry Level & New Grad',
+    description: 'Education-first layout that makes the most of limited work experience',
+    category: 'modern',
+    suitedFor: ['Recent Graduate', 'Intern', 'Entry Level', 'Career Changer', 'Student'],
+    industries: ['Any Industry', 'Technology', 'Business', 'Healthcare', 'Education'],
+    features: ['Education first', 'Projects showcase', 'Skills emphasis', 'Activities & honors'],
+    customizations: {
+      fonts: ['Nunito', 'Poppins', 'Raleway', 'Quicksand'],
+      accentColors: ['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899'],
+      sectionOrder: true,
+      layout: 'single-column'
+    },
+    constraints: {
+      maxExperience: 5,
+      maxEducation: 4,
+      maxSkills: 20,
+      maxProjects: 8,
+      recommendedSections: ['personalInfo', 'education', 'projects', 'skills', 'experience']
+    },
+    preview: '/templates/entrylevel-preview.jpg'
+  },
+
+  sales: {
+    id: 'sales',
+    name: 'Sales & Marketing',
+    description: 'Bold, metrics-driven layout built to showcase numbers and results',
+    category: 'modern',
+    suitedFor: ['Sales Manager', 'Account Executive', 'Marketing Manager', 'Business Development', 'Growth Hacker'],
+    industries: ['Sales', 'Marketing', 'Advertising', 'Real Estate', 'Insurance'],
+    features: ['Metrics-forward', 'Bold header', 'Achievement highlights', 'Revenue numbers'],
+    customizations: {
+      fonts: ['Montserrat', 'Raleway', 'Oswald', 'Barlow'],
+      accentColors: ['#dc2626', '#ea580c', '#d97706', '#16a34a', '#2563eb'],
+      sectionOrder: true,
+      layout: 'single-column'
+    },
+    constraints: {
+      maxExperience: 8,
+      maxEducation: 3,
+      maxSkills: 15,
+      maxProjects: 4,
+      recommendedSections: ['personalInfo', 'experience', 'skills', 'education']
+    },
+    preview: '/templates/sales-preview.jpg'
+  },
+
+  federal: {
+    id: 'federal',
+    name: 'Federal & Government',
+    description: 'Strict formatting compliance for US federal job applications',
+    category: 'classic',
+    suitedFor: ['Federal Employee', 'Government Contractor', 'Military Veteran', 'Public Servant', 'Policy Analyst'],
+    industries: ['Federal Government', 'State Government', 'Military', 'Defense', 'Public Policy'],
+    features: ['GS grade compatible', 'Detailed descriptions', 'KSA sections', 'Compliance formatting'],
+    customizations: {
+      fonts: ['Times New Roman', 'Arial', 'Calibri', 'Georgia'],
+      accentColors: ['#1e3a5f', '#1f2937', '#374151', '#1e40af', '#166534'],
+      sectionOrder: true,
+      layout: 'single-column'
+    },
+    constraints: {
+      maxExperience: 20,
+      maxEducation: 8,
+      maxSkills: 25,
+      maxProjects: 5,
+      recommendedSections: ['personalInfo', 'experience', 'education', 'skills']
+    },
+    preview: '/templates/federal-preview.jpg'
   }
 };
 
