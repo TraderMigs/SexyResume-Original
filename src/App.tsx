@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import LandingPage from './pages/LandingPage';
 import PersonalInfoForm from './components/PersonalInfoForm';
 import ExperienceForm from './components/ExperienceForm';
 import EducationForm from './components/EducationForm';
@@ -29,11 +30,11 @@ import { SEO_PAGES } from './lib/seo';
 import { Resume, PersonalInfo, Experience, Education, Skill, Project } from './types/resume';
 import {
   User, Briefcase, GraduationCap, Zap, FolderOpen,
-  Palette, Eye, Download, FileText, Upload, CheckCircle,
+  Palette, Eye, Download, CheckCircle,
 } from 'lucide-react';
 
 type ActiveTab = 'personal' | 'experience' | 'education' | 'skills' | 'projects' | 'template' | 'preview' | 'export';
-type PostAuthAction = 'coverLetter' | 'export' | null;
+type PostAuthAction = 'upload' | 'build' | 'export' | null;
 
 export default function App() {
   const { user } = useAuth();
@@ -60,10 +61,11 @@ export default function App() {
   useEffect(() => { if (resume) setResumeData(resume); }, [resume]);
   useEffect(() => { trackPage('/', 'Resume Builder'); }, [trackPage]);
 
-  // Execute pending action after user signs in
+  // After sign-in, execute the pending action
   useEffect(() => {
     if (user && postAuthAction) {
-      if (postAuthAction === 'coverLetter') setShowCoverLetterGenerator(true);
+      if (postAuthAction === 'upload') setShowUploadModal(true);
+      if (postAuthAction === 'build') setActiveTab('personal');
       if (postAuthAction === 'export') setActiveTab('export');
       setPostAuthAction(null);
     }
@@ -110,16 +112,36 @@ export default function App() {
     setResumeData(u); saveResume(u);
     track('resume_uploaded', { hasData: !!uploadedData });
     showSaveConfirmation('Resume loaded successfully!');
+    // After upload lands, jump to preview tab so they see the result immediately
+    setActiveTab('preview');
   }, [resumeData, saveResume, track]);
 
-  const handleCoverLetterClick = () => {
-    if (!user) { setPostAuthAction('coverLetter'); setShowAuthModal(true); }
-    else setShowCoverLetterGenerator(true);
+  // Landing page CTA: Upload Resume
+  const handleLandingUpload = () => {
+    if (!user) {
+      setPostAuthAction('upload');
+      setShowAuthModal(true);
+    } else {
+      setShowUploadModal(true);
+    }
+  };
+
+  // Landing page CTA: Build from scratch
+  const handleLandingBuild = () => {
+    if (!user) {
+      setPostAuthAction('build');
+      setShowAuthModal(true);
+    }
+    // if user already signed in, they won't see the landing — builder shows directly
   };
 
   const handleUnlockClick = () => {
     if (!user) { setPostAuthAction('export'); setShowAuthModal(true); }
     else setActiveTab('export');
+  };
+
+  const handleCoverLetterClick = () => {
+    if (user) setShowCoverLetterGenerator(true);
   };
 
   const tabs = [
@@ -130,7 +152,7 @@ export default function App() {
     { id: 'projects' as const, label: 'Projects', icon: FolderOpen },
     { id: 'template' as const, label: 'Template', icon: Palette },
     { id: 'preview' as const, label: 'Preview', icon: Eye },
-    { id: 'export' as const, label: 'Export', icon: Download }
+    { id: 'export' as const, label: 'Export', icon: Download },
   ];
 
   return (
@@ -151,70 +173,124 @@ export default function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="*" element={
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen flex flex-col overflow-x-hidden">
-                <Header onAuthClick={() => setShowAuthModal(true)} />
 
-                <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 w-full">
-                  {!user && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
-                      <p className="text-blue-800 text-sm">
-                        <strong>Working Offline</strong> — Your resume is being saved locally. Sign in to save permanently and unlock AI features.
-                      </p>
+              /* ── LOGGED OUT → LANDING PAGE ─────────────────────────────── */
+              !user ? (
+                <div className="flex flex-col min-h-screen">
+                  {/* Minimal header for landing */}
+                  <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
+                    <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                      <img src="/New Header Logo copy copy.png" alt="SexyResume" className="h-12 w-auto" />
                       <button
                         onClick={() => setShowAuthModal(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm font-medium ml-4"
+                        className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+                        style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed)' }}
                       >
-                        Sign In Now
+                        Sign In
                       </button>
                     </div>
+                  </header>
+
+                  <main className="flex-1">
+                    <LandingPage onSignIn={handleLandingBuild} onUpload={handleLandingUpload} />
+                  </main>
+
+                  <footer className="bg-gray-900 text-gray-400 py-10 px-6">
+                    <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+                      <p>© {new Date().getFullYear()} SexyResume.com · All rights reserved</p>
+                      <div className="flex gap-6">
+                        <span className="hover:text-white cursor-pointer transition-colors">Privacy Policy</span>
+                        <span className="hover:text-white cursor-pointer transition-colors">Terms of Service</span>
+                        <span className="hover:text-white cursor-pointer transition-colors">Support</span>
+                      </div>
+                    </div>
+                  </footer>
+
+                  <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+                  <CookieConsent onConsentChange={handleConsentChange} />
+                </div>
+
+              ) : (
+
+                /* ── LOGGED IN → BUILDER ───────────────────────────────────── */
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen flex flex-col overflow-x-hidden">
+                  <Header onAuthClick={() => setShowAuthModal(true)} />
+
+                  <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 w-full">
+
+                    {/* Builder top actions */}
+                    <div className="mb-6 flex items-center gap-2 sm:gap-3">
+                      <button
+                        onClick={() => setShowUploadModal(true)}
+                        className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-white text-sm font-bold shadow-md transition-all hover:scale-105"
+                        style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed)' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span>Upload Resume</span>
+                      </button>
+                    </div>
+
+                    {/* Builder card */}
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                      <div
+                        className="flex overflow-x-auto gap-1 p-3 bg-gray-50 border-b border-gray-200"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      >
+                        {tabs.map(({ id, label, icon: Icon }) => (
+                          <button
+                            key={id}
+                            onClick={() => setActiveTab(id)}
+                            className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-colors font-medium whitespace-nowrap ${
+                              activeTab === id
+                                ? 'bg-purple-600 text-white shadow-sm'
+                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span className="text-xs sm:text-sm">{label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="p-6">
+                        {activeTab === 'personal' && <PersonalInfoForm initialData={resumeData.personalInfo} onSave={updatePersonalInfo} />}
+                        {activeTab === 'experience' && <ExperienceForm initialData={resumeData.experience} onSave={updateExperience} />}
+                        {activeTab === 'education' && <EducationForm initialData={resumeData.education} onSave={updateEducation} />}
+                        {activeTab === 'skills' && <SkillsForm initialData={resumeData.skills} onSave={updateSkills} />}
+                        {activeTab === 'projects' && <ProjectsForm initialData={resumeData.projects} onSave={updateProjects} />}
+                        {activeTab === 'template' && <TemplateSelector resume={resumeData} selectedTemplate={resumeData.template} onTemplateChange={updateTemplate} />}
+                        {activeTab === 'preview' && <ResumePreview resume={resumeData} onUnlockClick={handleUnlockClick} />}
+                        {activeTab === 'export' && (
+                          <ExportOptions
+                            resume={resumeData}
+                            onGenerateCoverLetter={handleCoverLetterClick}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </main>
+
+                  <Footer />
+
+                  <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+                  {showUploadModal && (
+                    <ResumeUpload
+                      onResumeLoaded={handleResumeUpload}
+                      onClose={() => setShowUploadModal(false)}
+                    />
                   )}
 
-                  <div className="mb-6 flex items-center gap-2 sm:gap-3">
-                    <button onClick={() => setShowUploadModal(true)} className="flex items-center space-x-1.5 px-3 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm">
-                      <Upload className="w-4 h-4" /><span>Upload Resume</span>
-                    </button>
-                    <button onClick={handleCoverLetterClick} className="flex items-center space-x-1.5 px-3 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm">
-                      <FileText className="w-4 h-4" /><span>Generate Cover Letter</span>
-                    </button>
-                  </div>
+                  {showCoverLetterGenerator && (
+                    <CoverLetterGenerator
+                      resume={resumeData}
+                      onClose={() => setShowCoverLetterGenerator(false)}
+                    />
+                  )}
 
-                  <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="flex overflow-x-auto gap-1 p-3 bg-gray-50 border-b border-gray-200 scrollbar-hide" style={{scrollbarWidth:"none",msOverflowStyle:"none"}}>
-                      {tabs.map(({ id, label, icon: Icon }) => (
-                        <button key={id} onClick={() => setActiveTab(id)}
-                          className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-colors font-medium whitespace-nowrap ${activeTab === id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
-                          <Icon className="w-4 h-4" />
-                          <span className="text-xs sm:text-sm">{label}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="p-6">
-                      {activeTab === 'personal' && <PersonalInfoForm initialData={resumeData.personalInfo} onSave={updatePersonalInfo} />}
-                      {activeTab === 'experience' && <ExperienceForm initialData={resumeData.experience} onSave={updateExperience} />}
-                      {activeTab === 'education' && <EducationForm initialData={resumeData.education} onSave={updateEducation} />}
-                      {activeTab === 'skills' && <SkillsForm initialData={resumeData.skills} onSave={updateSkills} />}
-                      {activeTab === 'projects' && <ProjectsForm initialData={resumeData.projects} onSave={updateProjects} />}
-                      {activeTab === 'template' && <TemplateSelector resume={resumeData} selectedTemplate={resumeData.template} onTemplateChange={updateTemplate} />}
-                      {activeTab === 'preview' && <ResumePreview resume={resumeData} onUnlockClick={handleUnlockClick} />}
-                      {activeTab === 'export' && <ExportOptions resume={resumeData} />}
-                    </div>
-                  </div>
-                </main>
-
-                <Footer />
-
-                {/* FIX: isOpen prop is required by AuthModal */}
-                <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-
-                {showUploadModal && <ResumeUpload onResumeLoaded={handleResumeUpload} onClose={() => setShowUploadModal(false)} />}
-
-                {showCoverLetterGenerator && user && (
-                  <CoverLetterGenerator resume={resumeData} onClose={() => setShowCoverLetterGenerator(false)} />
-                )}
-
-                <CookieConsent onConsentChange={handleConsentChange} />
-              </div>
+                  <CookieConsent onConsentChange={handleConsentChange} />
+                </div>
+              )
             } />
           </Routes>
         </SecurityProvider>
