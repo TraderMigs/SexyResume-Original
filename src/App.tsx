@@ -67,7 +67,7 @@ export default function App() {
   useEffect(() => { if (resume) setResumeData(resume); }, [resume]);
   useEffect(() => { trackPage('/', 'Resume Builder'); }, [trackPage]);
 
-  // After sign-in, execute pending action
+  // After sign-in, execute pending action + scroll to top
   useEffect(() => {
     if (user && postAuthAction) {
       if (postAuthAction === 'goTemplate') setActiveTab('template');
@@ -76,8 +76,17 @@ export default function App() {
       if (postAuthAction === 'goTab') { /* tab already set */ }
       setPostAuthAction(null);
       setAuthModalMessage(undefined);
+      // Always scroll to top when transitioning into builder
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [user, postAuthAction]);
+
+  // Also scroll to top whenever user first signs in (even without postAuthAction)
+  useEffect(() => {
+    if (user) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [user]);
 
   const handleConsentChange = (consents: ConsentPreferences) => {
     setHasConsent(consents.analytics);
@@ -197,7 +206,7 @@ export default function App() {
                 <div className="flex flex-col min-h-screen">
                   {/* Minimal landing header */}
                   <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
-                    <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                       <img src="/New Header Logo copy copy.png" alt="SexyResume" className="h-12 w-auto" />
                       <button
                         onClick={() => setShowAuthModal(true)}
