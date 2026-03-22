@@ -119,8 +119,8 @@ export default function App() {
     const u = { ...resumeData, projects, updatedAt: new Date().toISOString() };
     setResumeData(u); await saveResume(u); showSaveConfirmation('Projects saved!');
   };
-  const updateTemplate = async (template: string) => {
-    const u = { ...resumeData, template, updatedAt: new Date().toISOString() };
+  const updateTemplate = async (template: string, customizations?: any) => {
+    const u = { ...resumeData, template, ...(customizations ? { customizations } : {}), updatedAt: new Date().toISOString() };
     setResumeData(u); await saveResume(u); showSaveConfirmation('Template selected!');
   };
 
@@ -325,6 +325,7 @@ export default function App() {
                             resume={resumeData}
                             selectedTemplate={resumeData.template}
                             onTemplateChange={updateTemplate}
+                            customizations={(resumeData as any).customizations}
                             requiresAuthForMore={false}
                           />
                         )}
