@@ -1,7 +1,7 @@
 import { PaymentConfig } from '../types/payment';
 
 export const PAYMENT_CONFIG: PaymentConfig = {
-  priceId: import.meta.env.VITE_STRIPE_PRICE_ID || 'price_1RntxwRrIlnVe6VQGCrp5lxU',
+  priceId: import.meta.env.VITE_STRIPE_PRICE_ID || '',
   productName: 'Sexy Resume',
   amount: 700, // $7.00 in cents
   currency: 'usd'
