@@ -123,7 +123,7 @@ export default function ResumePreview({ resume, onUnlockClick }: ResumePreviewPr
               bottom: 0,
               left: 0,
               right: 0,
-              height: '62%',
+              height: '55%',
               zIndex: 20,
               background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 15%, rgba(255,255,255,0.92) 35%, rgba(255,255,255,1) 55%)',
               display: 'flex',
