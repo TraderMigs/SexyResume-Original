@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserEntitlement, CreateCheckoutRequest, CreateCheckoutResponse } from '../types/payment';
 import { useAuth } from '../contexts/AuthContext';
-import { isStripeConfigured } from '../lib/paymentConfig';
+import { isStripeConfigured, PAYMENT_CONFIG } from '../lib/paymentConfig';
 
 interface UsePaymentsReturn {
   entitlement: UserEntitlement | null;
@@ -70,7 +70,7 @@ export function usePayments(): UsePaymentsReturn {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          price_id: 'price_1RntxwRrIlnVe6VQGCrp5lxU',
+          price_id: PAYMENT_CONFIG.priceId,
           success_url: request.successUrl,
           cancel_url: request.cancelUrl,
           mode: 'payment'
