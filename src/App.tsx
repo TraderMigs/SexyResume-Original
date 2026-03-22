@@ -151,10 +151,10 @@ export default function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="*" element={
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen flex flex-col">
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen flex flex-col overflow-x-hidden">
                 <Header onAuthClick={() => setShowAuthModal(true)} />
 
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 w-full">
                   {!user && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
                       <p className="text-blue-800 text-sm">
@@ -182,7 +182,7 @@ export default function App() {
                     <div className="flex overflow-x-auto gap-1 p-3 bg-gray-50 border-b border-gray-200 scrollbar-hide" style={{scrollbarWidth:"none",msOverflowStyle:"none"}}>
                       {tabs.map(({ id, label, icon: Icon }) => (
                         <button key={id} onClick={() => setActiveTab(id)}
-                          className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-colors font-medium ${activeTab === id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
+                          className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-colors font-medium whitespace-nowrap ${activeTab === id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                           <Icon className="w-4 h-4" />
                           <span className="text-xs sm:text-sm">{label}</span>
                         </button>
