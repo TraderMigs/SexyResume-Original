@@ -15,7 +15,7 @@ const getMessages = (isLoggedIn: boolean) => [
   { text: 'What are you wearing for the interview?', emoji: '👀' },
   isLoggedIn
     ? { text: 'Syncing to your account...', emoji: '🔒' }
-    : { text: 'Log in after. Got dressing tips for ya', emoji: '👖' },
+    : { text: 'Log in after. Got dressing tips for ya!', emoji: '👖' },
   { text: 'OK, your resume just got elevated!', emoji: '🚀' },
   { text: 'Smile. This interview is already won!', emoji: '🏅' },
 ];
