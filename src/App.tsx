@@ -19,12 +19,14 @@ import ProjectsForm from './components/ProjectsForm';
 import TemplateSelector from './components/TemplateSelector';
 import ResumePreview from './components/ResumePreview';
 import ExportOptions from './components/ExportOptions';
+import DownloadTab from './components/DownloadTab';
 import CoverLetterGenerator from './components/CoverLetterGenerator';
 import ResumeUpload from './components/ResumeUpload';
 import CookieConsent, { ConsentPreferences } from './components/CookieConsent';
 import FraudDetection from './components/FraudDetection';
 import { useResume } from './hooks/useResume';
 import { useAuth } from './contexts/AuthContext';
+import { usePayments } from './hooks/usePayments';
 import { useAnalytics } from './hooks/useAnalytics';
 import { initAnalytics, updateAnalyticsConsent } from './lib/analytics';
 import { SEO_PAGES } from './lib/seo';
@@ -34,7 +36,7 @@ import {
   Palette, Eye, Download, CheckCircle, Lock,
 } from 'lucide-react';
 
-type ActiveTab = 'personal' | 'experience' | 'education' | 'skills' | 'projects' | 'template' | 'preview' | 'export';
+type ActiveTab = 'personal' | 'experience' | 'education' | 'skills' | 'projects' | 'template' | 'preview' | 'export' | 'download';
 type PostAuthAction = 'goTemplate' | 'goPersonal' | 'goTab' | 'export' | null;
 
 // Three app states for logged-out users
@@ -44,6 +46,7 @@ export default function App() {
   const { user } = useAuth();
   const { resume, saveResume } = useResume();
   const { trackPage, track } = useAnalytics();
+  const { entitlement } = usePayments();
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('template');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -66,6 +69,15 @@ export default function App() {
 
   useEffect(() => { if (resume) setResumeData(resume); }, [resume]);
   useEffect(() => { trackPage('/', 'Resume Builder'); }, [trackPage]);
+
+  // Redirect to download tab when returning from Stripe with payment=success
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success' && user) {
+      setActiveTab('download');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [user]);
 
   // After sign-in, execute pending action + scroll to top
   useEffect(() => {
@@ -180,6 +192,7 @@ export default function App() {
     { id: 'template' as const, label: 'Template', icon: Palette, requiresAuth: false },
     { id: 'preview' as const, label: 'Preview', icon: Eye, requiresAuth: false },
     { id: 'export' as const, label: 'Export', icon: Download, requiresAuth: true },
+    ...(entitlement?.exportUnlocked ? [{ id: 'download' as const, label: 'Download', icon: CheckCircle, requiresAuth: true }] : []),
   ];
 
   return (
@@ -334,6 +347,9 @@ export default function App() {
                         )}
                         {activeTab === 'export' && (
                           <ExportOptions resume={resumeData} onGenerateCoverLetter={handleCoverLetterClick} />
+                        )}
+                        {activeTab === 'download' && (
+                          <DownloadTab resume={resumeData} onGenerateCoverLetter={handleCoverLetterClick} />
                         )}
                       </div>
                     </div>
