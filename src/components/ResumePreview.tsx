@@ -100,7 +100,7 @@ export default function ResumePreview({ resume, onUnlockClick }: ResumePreviewPr
       <div
         ref={containerRef}
         className="relative border border-gray-200 rounded-xl overflow-hidden shadow-md bg-white"
-        style={{ height: scaledHeight ? `${scaledHeight}px` : 'auto' }}
+        style={{ height: scaledHeight ? `${scaledHeight}px` : 'auto', maxWidth: '816px', margin: '0 auto' }}
       >
         <style dangerouslySetInnerHTML={{ __html: renderedCss }} />
 
