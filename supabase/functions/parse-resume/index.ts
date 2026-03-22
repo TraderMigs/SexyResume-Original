@@ -109,6 +109,7 @@ async function extractTextFromPDF(file: File): Promise<string> {
       headers: {
         'x-api-key': anthropicKey,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'pdfs-2024-09-25',
         'content-type': 'application/json',
       },
       body: JSON.stringify({
