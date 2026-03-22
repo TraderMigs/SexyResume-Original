@@ -151,7 +151,7 @@ export default function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="*" element={
-              <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen flex flex-col">
                 <Header onAuthClick={() => setShowAuthModal(true)} />
 
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -169,22 +169,22 @@ export default function App() {
                     </div>
                   )}
 
-                  <div className="mb-6 flex flex-wrap items-center gap-3">
-                    <button onClick={() => setShowUploadModal(true)} className="flex items-center space-x-2 px-4 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm">
+                  <div className="mb-6 flex items-center gap-2 sm:gap-3">
+                    <button onClick={() => setShowUploadModal(true)} className="flex items-center space-x-1.5 px-3 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm">
                       <Upload className="w-4 h-4" /><span>Upload Resume</span>
                     </button>
-                    <button onClick={handleCoverLetterClick} className="flex items-center space-x-2 px-4 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm">
+                    <button onClick={handleCoverLetterClick} className="flex items-center space-x-1.5 px-3 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm">
                       <FileText className="w-4 h-4" /><span>Generate Cover Letter</span>
                     </button>
                   </div>
 
                   <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="flex flex-wrap gap-1 p-3 bg-gray-50 border-b border-gray-200">
+                    <div className="flex overflow-x-auto gap-1 p-3 bg-gray-50 border-b border-gray-200 scrollbar-hide" style={{scrollbarWidth:"none",msOverflowStyle:"none"}}>
                       {tabs.map(({ id, label, icon: Icon }) => (
                         <button key={id} onClick={() => setActiveTab(id)}
                           className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-colors font-medium ${activeTab === id ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
                           <Icon className="w-4 h-4" />
-                          <span className="hidden sm:inline">{label}</span>
+                          <span className="text-xs sm:text-sm">{label}</span>
                         </button>
                       ))}
                     </div>
