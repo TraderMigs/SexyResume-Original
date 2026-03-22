@@ -20,6 +20,27 @@ interface UseResumeReturn {
 
 const LOCAL_STORAGE_KEY = 'sexyresume_draft';
 
+// The resumes table stores resume data in a JSONB 'data' column.
+// DB row shape: { id, user_id, title, data: {...resumeFields}, template, ... }
+// This helper extracts the Resume object from the DB row.
+function dbRowToResume(row: any): Resume {
+  const inner = row?.data ?? {};
+  return {
+    id: row.id || inner.id || '',
+    personalInfo: inner.personalInfo || {
+      fullName: '', email: '', phone: '', location: '',
+      linkedin: '', website: '', summary: '',
+    },
+    experience: inner.experience || [],
+    education: inner.education || [],
+    skills: inner.skills || [],
+    projects: inner.projects || [],
+    template: row.template || inner.template || 'modern',
+    createdAt: inner.createdAt || row.created_at || new Date().toISOString(),
+    updatedAt: inner.updatedAt || row.updated_at || new Date().toISOString(),
+  };
+}
+
 export function useResume(): UseResumeReturn {
   const { user, session } = useAuth();
   const [resume, setResume] = useState<Resume | null>(null);
@@ -37,11 +58,9 @@ export function useResume(): UseResumeReturn {
         setResume(parsed);
       } catch (err) {
         console.error('Failed to load draft from localStorage:', err);
-        // Initialize with empty resume on error
         initializeEmptyResume();
       }
     } else {
-      // Initialize with empty resume if no saved draft
       initializeEmptyResume();
     }
   }, []);
@@ -50,13 +69,8 @@ export function useResume(): UseResumeReturn {
     const emptyResume: Resume = {
       id: '',
       personalInfo: {
-        fullName: '',
-        email: '',
-        phone: '',
-        location: '',
-        linkedin: '',
-        website: '',
-        summary: ''
+        fullName: '', email: '', phone: '', location: '',
+        linkedin: '', website: '', summary: '',
       },
       experience: [],
       education: [],
@@ -64,24 +78,22 @@ export function useResume(): UseResumeReturn {
       projects: [],
       template: 'modern',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
     setResume(emptyResume);
   };
 
-  // Load user's resumes when authenticated
+  // Load user's resumes from cloud when authenticated
   useEffect(() => {
     if (user && session) {
       loadUserResumes();
     } else {
       setResumes([]);
-      // Don't clear local resume when not authenticated
     }
   }, [user, session]);
 
   const loadUserResumes = async () => {
     if (!session) return;
-
     try {
       setLoading(true);
       setError(null);
@@ -94,11 +106,13 @@ export function useResume(): UseResumeReturn {
 
       if (error) throw error;
 
-      setResumes(data || []);
+      const parsed = (data || []).map(dbRowToResume);
+      setResumes(parsed);
 
-      // If no current resume is selected, select the most recent one
-      if (!resume && data && data.length > 0) {
-        setResume(data[0]);
+      // Load most recent resume if none currently selected or current has no id
+      if ((!resume || !resume.id) && parsed.length > 0) {
+        setResume(parsed[0]);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsed[0]));
       }
     } catch (err: any) {
       setError(err.message);
@@ -109,7 +123,6 @@ export function useResume(): UseResumeReturn {
 
   const loadResume = async (resumeId: string) => {
     if (!session) return;
-
     try {
       setLoading(true);
       setError(null);
@@ -123,7 +136,9 @@ export function useResume(): UseResumeReturn {
 
       if (error) throw error;
 
-      setResume(data);
+      const parsed = dbRowToResume(data);
+      setResume(parsed);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsed));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -133,7 +148,6 @@ export function useResume(): UseResumeReturn {
 
   const createResume = async (resumeData: Partial<Resume>): Promise<string> => {
     if (!session || !user) throw new Error('Not authenticated');
-
     try {
       setSaving(true);
       setError(null);
@@ -142,21 +156,23 @@ export function useResume(): UseResumeReturn {
         .from('resumes')
         .insert({
           user_id: user.id,
-          title: resumeData.personalInfo?.fullName ? `${resumeData.personalInfo.fullName}'s Resume` : 'My Resume',
+          title: resumeData.personalInfo?.fullName
+            ? `${resumeData.personalInfo.fullName}'s Resume`
+            : 'My Resume',
           data: resumeData,
-          template: resumeData.template || 'modern'
+          template: resumeData.template || 'modern',
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      setResume(data);
-      await loadUserResumes(); // Refresh the list
-      
-      // Clear localStorage draft after successful cloud save
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-
+      const parsed = dbRowToResume(data);
+      // Preserve the new DB id in the resume object
+      const withId = { ...parsed, id: data.id };
+      setResume(withId);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(withId));
+      await loadUserResumes();
       return data.id;
     } catch (err: any) {
       setError(err.message);
@@ -166,61 +182,52 @@ export function useResume(): UseResumeReturn {
     }
   };
 
-  // NEW: Local-only save (doesn't require authentication)
+  // Save locally + optionally to cloud
   const saveResume = async (resumeData: Partial<Resume>) => {
     try {
       setSaving(true);
       setError(null);
 
-      // Merge with existing resume data to preserve all fields
       const mergedResume: Resume = {
-        id: resume?.id || '',
-        personalInfo: resumeData.personalInfo || resume?.personalInfo || {
-          fullName: '',
-          email: '',
-          phone: '',
-          location: '',
-          linkedin: '',
-          website: '',
-          summary: ''
+        id: resume?.id || resumeData.id || '',
+        personalInfo: resumeData.personalInfo ?? resume?.personalInfo ?? {
+          fullName: '', email: '', phone: '', location: '',
+          linkedin: '', website: '', summary: '',
         },
-        experience: resumeData.experience || resume?.experience || [],
-        education: resumeData.education || resume?.education || [],
-        skills: resumeData.skills || resume?.skills || [],
-        projects: resumeData.projects || resume?.projects || [],
-        template: resumeData.template || resume?.template || 'modern',
+        experience: resumeData.experience ?? resume?.experience ?? [],
+        education: resumeData.education ?? resume?.education ?? [],
+        skills: resumeData.skills ?? resume?.skills ?? [],
+        projects: resumeData.projects ?? resume?.projects ?? [],
+        template: resumeData.template ?? resume?.template ?? 'modern',
         createdAt: resume?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
-      // Save to localStorage immediately (works offline)
+      // Always save to localStorage first
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mergedResume));
-      
-      // Update local state
       setResume(mergedResume);
 
-      // If user is authenticated, also save to cloud
+      // Also save to cloud if authenticated
       if (session && user) {
         await saveResumeToCloud(mergedResume);
       }
     } catch (err: any) {
       setError(err.message);
-      // Don't throw - local save succeeded even if cloud failed
+      // Don't throw — localStorage save succeeded
     } finally {
       setSaving(false);
     }
   };
 
-  // Cloud save (requires authentication)
+  // Cloud-only save
   const saveResumeToCloud = async (resumeData: Partial<Resume>) => {
     if (!session || !user) throw new Error('Not authenticated');
-
     try {
       setSaving(true);
       setError(null);
 
       if (!resume?.id) {
-        // Create new resume
+        // No existing DB record — create one
         await createResume(resumeData);
         return;
       }
@@ -228,9 +235,12 @@ export function useResume(): UseResumeReturn {
       const { data, error } = await supabase
         .from('resumes')
         .update({
-          title: resumeData.personalInfo?.fullName ? `${resumeData.personalInfo.fullName}'s Resume` : 'My Resume',
+          title: resumeData.personalInfo?.fullName
+            ? `${resumeData.personalInfo.fullName}'s Resume`
+            : 'My Resume',
           data: resumeData,
-          template: resumeData.template || 'modern'
+          template: resumeData.template || 'modern',
+          updated_at: new Date().toISOString(),
         })
         .eq('id', resume.id)
         .eq('user_id', user.id)
@@ -239,11 +249,11 @@ export function useResume(): UseResumeReturn {
 
       if (error) throw error;
 
-      setResume(data);
-      await loadUserResumes(); // Refresh the list
-      
-      // Clear localStorage draft after successful cloud save
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      // Keep the id from the update, merge data back
+      const parsed = dbRowToResume(data);
+      const withId = { ...parsed, id: data.id };
+      setResume(withId);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(withId));
     } catch (err: any) {
       setError(err.message);
       throw err;
@@ -254,13 +264,11 @@ export function useResume(): UseResumeReturn {
 
   const updateResumeState = (resumeData: Resume) => {
     setResume(resumeData);
-    // Also save to localStorage
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(resumeData));
   };
 
   const deleteResume = async (resumeId: string) => {
     if (!session || !user) throw new Error('Not authenticated');
-
     try {
       setLoading(true);
       setError(null);
@@ -273,13 +281,12 @@ export function useResume(): UseResumeReturn {
 
       if (error) throw error;
 
-      // If we deleted the current resume, clear it
       if (resume?.id === resumeId) {
         setResume(null);
         localStorage.removeItem(LOCAL_STORAGE_KEY);
       }
 
-      await loadUserResumes(); // Refresh the list
+      await loadUserResumes();
     } catch (err: any) {
       setError(err.message);
       throw err;

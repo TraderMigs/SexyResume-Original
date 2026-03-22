@@ -89,7 +89,7 @@ export default function UpsellModal({ isOpen, onClose, feature = 'Premium Featur
               </span>
               <span className="text-gray-600 ml-2">one-time</span>
             </div>
-            <p className="text-sm text-gray-600">No subscriptions. Pay once, use forever.</p>
+            <p className="text-sm text-gray-600">No subscriptions. Pay once, download in any format.</p>
           </div>
 
           {/* Features List */}

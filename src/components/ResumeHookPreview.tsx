@@ -155,8 +155,8 @@ export default function ResumeHookPreview({ resume, onSignIn }: ResumeHookPrevie
       {/* Preview with blur gate */}
       <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-purple-100">
 
-        {/* Live template preview */}
-        <div style={{ maxHeight: '420px', overflow: 'hidden' }}>
+        {/* Live template preview — full height, no cap */}
+        <div style={{ overflow: 'hidden' }}>
           {threeIds.map((id, idx) => (
             <TemplatePreviewFrame
               key={id}
@@ -188,7 +188,7 @@ export default function ResumeHookPreview({ resume, onSignIn }: ResumeHookPrevie
             7 more sexy templates inside
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            Plus editing, AI enhancements, and cover letter — all free after sign up.
+            Plus editing, all 10 templates, and cover letter generation — all included.
           </p>
 
           <button

@@ -130,7 +130,7 @@ export default function PaymentSuccess({ resume, onClose, onGenerateCoverLetter,
                   Your resume is ready. 🎉
                 </h2>
                 <p className="text-gray-500 text-sm">
-                  Watermark-free · Professional · Yours forever
+                  Watermark-free · Professional · Download anytime
                 </p>
               </div>
 

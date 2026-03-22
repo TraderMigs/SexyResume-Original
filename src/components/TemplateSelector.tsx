@@ -30,7 +30,8 @@ export default function TemplateSelector({
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
 
   useEffect(() => {
-    if (resume.personalInfo.fullName || resume.experience.length > 0) {
+    // Guard against undefined personalInfo (resume not yet hydrated)
+    if (resume?.personalInfo?.fullName || (resume?.experience?.length ?? 0) > 0) {
       const recs = getTemplateRecommendations(resume);
       setRecommendations(recs);
     }
@@ -227,50 +228,84 @@ export default function TemplateSelector({
         })}
       </div>
 
-      {/* Customization Panel (authed only) */}
+      {/* Customization MODAL (authed only) */}
       {showCustomization && selectedTemplateObj && !requiresAuthForMore && (
-        <div className="border-t border-gray-200 pt-6">
-          <h3 className="font-medium text-gray-900 mb-4">Customize Template</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Font Family</label>
-              <select
-                value={customizations?.font || selectedTemplateObj.customizations.fonts[0]}
-                onChange={(e) => handleCustomizationChange('font', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-sexy-pink-500 focus:border-transparent"
-              >
-                {selectedTemplateObj.customizations.fonts.map((font) => (
-                  <option key={font} value={font}>{font}</option>
-                ))}
-              </select>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <Wand2 className="w-5 h-5 text-sexy-pink-600" />
+                <h3 className="text-lg font-bold text-gray-900">Customize Template</h3>
+              </div>
+              <button
+                onClick={() => setShowCustomization(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
+              >✕</button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Accent Color</label>
-              <div className="flex space-x-2">
-                {selectedTemplateObj.customizations.accentColors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => handleCustomizationChange('accentColor', color)}
-                    className={`w-8 h-8 rounded-full border-2 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sexy-pink-500 ${
-                      (customizations?.accentColor || selectedTemplateObj.customizations.accentColors[0]) === color
-                        ? 'border-gray-400 scale-110' : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    style={{ backgroundColor: color }}
-                    aria-label={`Select ${color}`}
+
+            <div className="p-5 space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Applying to: <span className="text-purple-600">{selectedTemplateObj.name}</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Font Family</label>
+                <select
+                  value={customizations?.font || selectedTemplateObj.customizations.fonts[0]}
+                  onChange={(e) => handleCustomizationChange('font', e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-sexy-pink-500 focus:border-transparent"
+                >
+                  {selectedTemplateObj.customizations.fonts.map((font) => (
+                    <option key={font} value={font}>{font}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Accent Color</label>
+                <div className="flex gap-3 flex-wrap">
+                  {selectedTemplateObj.customizations.accentColors.map((color) => {
+                    const isSelected = (customizations?.accentColor || selectedTemplateObj.customizations.accentColors[0]) === color;
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => handleCustomizationChange('accentColor', color)}
+                        className="w-10 h-10 rounded-full transition-all focus:outline-none"
+                        style={{
+                          backgroundColor: color,
+                          transform: isSelected ? 'scale(1.2)' : 'scale(1)',
+                          boxShadow: isSelected ? `0 0 0 3px white, 0 0 0 5px ${color}` : 'none',
+                        }}
+                        aria-label={`Select ${color}`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={customizations?.hideEmptySections ?? true}
+                    onChange={(e) => handleCustomizationChange('hideEmptySections', e.target.checked)}
+                    className="rounded border-gray-300 text-sexy-pink-600 focus:ring-sexy-pink-500 w-4 h-4"
                   />
-                ))}
+                  <span className="text-sm text-gray-700">Hide empty sections</span>
+                </label>
               </div>
             </div>
-            <div className="md:col-span-2">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={customizations?.hideEmptySections ?? true}
-                  onChange={(e) => handleCustomizationChange('hideEmptySections', e.target.checked)}
-                  className="rounded border-gray-300 text-sexy-pink-600 focus:ring-sexy-pink-500"
-                />
-                <span className="text-sm text-gray-700">Hide empty sections</span>
-              </label>
+
+            <div className="p-5 border-t border-gray-100">
+              <button
+                onClick={() => setShowCustomization(false)}
+                className="w-full py-2.5 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed)' }}
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>

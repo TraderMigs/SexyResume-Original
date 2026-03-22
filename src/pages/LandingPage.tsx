@@ -53,7 +53,7 @@ export default function LandingPage({ onSignIn, onUpload }: LandingPageProps) {
 
           <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
             Upload your existing resume. Watch AI transform it. Download a professional,
-            watermark-free version for $7 — once, forever.
+            watermark-free version for $7 — pay once, keep forever.
           </p>
 
           {/* CTAs */}
@@ -171,7 +171,7 @@ export default function LandingPage({ onSignIn, onUpload }: LandingPageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { icon: Zap, title: 'AI Parsing', desc: 'Upload any PDF or Word doc — AI extracts every section instantly.', color: '#d946ef' },
-              { icon: Star, title: '$7 One-Time', desc: 'No subscriptions. Pay once, download unlimited formats forever.', color: '#7c3aed' },
+              { icon: Star, title: '$7 One-Time', desc: 'No subscriptions. Pay once, download in PDF, Word & plain text. No recurring charges.', color: '#7c3aed' },
               { icon: Shield, title: 'Privacy First', desc: 'Files auto-delete after 24 hours. GDPR compliant. No permanent storage.', color: '#0ba5d9' },
               { icon: FileText, title: 'Cover Letter', desc: 'AI generates a matching cover letter after you unlock — included free.', color: '#059669' },
             ].map(({ icon: Icon, title, desc, color }) => (
