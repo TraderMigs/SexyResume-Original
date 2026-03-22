@@ -47,22 +47,19 @@ export function validateEnvironment(): { isValid: boolean; errors: string[] } {
           break;
       }
     } else if (import.meta.env.PROD) {
-        // Only error on placeholders in production
       errors.push(`Environment variable ${varName} contains placeholder value`);
     }
   });
 
-  // Validate production-specific requirements
+  // Production warnings only — test keys are allowed (for staging/testing)
   if (import.meta.env.PROD) {
     if (!import.meta.env.VITE_SENTRY_DSN) {
       console.warn('Sentry DSN recommended for production error monitoring');
     }
-    
     if (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY?.startsWith('pk_test_')) {
-      errors.push('Test Stripe keys detected in production build');
+      console.warn('Using Stripe test keys in production build — OK for testing');
     }
   } else {
-    // Development mode warnings
     if (import.meta.env.VITE_SUPABASE_URL?.includes('placeholder')) {
       console.warn('Using placeholder Supabase URL in development mode');
     }
@@ -88,7 +85,6 @@ export function initEnvironmentValidation() {
     console.error('Environment validation failed:', validation.errors);
     
     if (import.meta.env.PROD) {
-      // In production, show user-friendly error
       document.body.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f3f4f6; font-family: system-ui;">
           <div style="background: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); max-width: 400px; text-align: center;">
@@ -100,7 +96,6 @@ export function initEnvironmentValidation() {
       `;
       throw new Error('Environment validation failed in production');
     } else {
-      // In development, show warnings but continue
       console.warn('Development mode: Some environment variables are missing or contain placeholders');
     }
   }
