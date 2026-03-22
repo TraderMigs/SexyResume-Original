@@ -86,6 +86,10 @@ function TemplatePreviewFrame({
               width: `${TEMPLATE_WIDTH_PX}px`,
               transform: `scale(${scale})`,
               transformOrigin: 'top left',
+              // Prevent the unscaled content from causing overflow
+              position: 'absolute',
+              top: 0,
+              left: 0,
             }}
             dangerouslySetInnerHTML={{ __html: html }}
           />
@@ -111,7 +115,7 @@ export default function ResumeHookPreview({ resume, onSignIn }: ResumeHookPrevie
   const activeTemplateName = allTemplates.find(t => t.id === activeTemplateId)?.name ?? '';
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
+    <div className="w-full max-w-3xl mx-auto px-3 sm:px-6">
 
       {/* Header message */}
       <div className="text-center mb-5">
@@ -127,7 +131,7 @@ export default function ResumeHookPreview({ resume, onSignIn }: ResumeHookPrevie
       </div>
 
       {/* 3 template selector pills */}
-      <div className="flex gap-2 justify-center mb-4">
+      <div className="flex flex-wrap gap-2 justify-center mb-4">
         {threeIds.map((id, idx) => {
           const name = allTemplates.find(t => t.id === id)?.name ?? id;
           const isActive = idx === activeIdx;
@@ -155,7 +159,7 @@ export default function ResumeHookPreview({ resume, onSignIn }: ResumeHookPrevie
       {/* Preview with blur gate */}
       <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-purple-100">
 
-        {/* Live template preview — full height, no cap */}
+        {/* Live template preview — full height, no artificial cap */}
         <div style={{ overflow: 'hidden' }}>
           {threeIds.map((id, idx) => (
             <TemplatePreviewFrame
@@ -188,12 +192,12 @@ export default function ResumeHookPreview({ resume, onSignIn }: ResumeHookPrevie
             7 more sexy templates inside
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            Plus editing, all 10 templates, and cover letter generation — all included.
+            Plus editing, AI enhancements, and cover letter — all free after sign up.
           </p>
 
           <button
             onClick={onSignIn}
-            className="group flex items-center gap-2 px-8 py-3.5 rounded-2xl text-white font-black text-base shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
+            className="group flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-2xl text-white font-black text-sm sm:text-base shadow-xl transition-all hover:scale-105 hover:shadow-2xl w-full sm:w-auto justify-center"
             style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed)' }}
           >
             Sign In — It's Free
@@ -201,7 +205,7 @@ export default function ResumeHookPreview({ resume, onSignIn }: ResumeHookPrevie
           </button>
 
           <p className="text-xs text-gray-400 mt-3">
-            No credit card · Free account · $7 to download
+            Free account · $7 only when you download
           </p>
         </div>
       </div>
