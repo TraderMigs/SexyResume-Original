@@ -60,7 +60,7 @@ function TemplatePreviewFrame({
     if (!html) return;
     const t = setTimeout(updateScale, 50);
     return () => clearTimeout(t);
-  }, [html, updateScale]);
+  }, [html, isActive, updateScale]);
 
   useEffect(() => {
     if (!html) return;
@@ -69,13 +69,11 @@ function TemplatePreviewFrame({
     return () => observer.disconnect();
   }, [html, updateScale]);
 
-  if (!isActive) return null;
-
   return (
     <div
       ref={containerRef}
       className="w-full overflow-hidden rounded-xl"
-      style={{ height: scaledHeight ? `${scaledHeight}px` : 'auto', position: 'relative' }}
+      style={{ height: scaledHeight ? `${scaledHeight}px` : 'auto', position: 'relative', display: isActive ? 'block' : 'none' }}
     >
       {html ? (
         <>
