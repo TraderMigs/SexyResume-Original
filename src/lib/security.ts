@@ -197,19 +197,9 @@ export function logSecurityEvent(event: {
   userAgent?: string;
   severity?: 'low' | 'medium' | 'high' | 'critical';
 }) {
-  const securityEvent = {
-    ...event,
-    timestamp: new Date().toISOString(),
-    userAgent: event.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'),
-    severity: event.severity || 'medium'
-  };
-
-  if (import.meta.env.PROD && typeof window !== 'undefined') {
-    fetch('/api/security-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(securityEvent)
-    }).catch(() => {});
+  // Security events are logged locally only — no external API endpoint
+  if (!import.meta.env.PROD) {
+    console.debug('[Security Event]', event.type, event.details);
   }
 }
 
