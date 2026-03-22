@@ -131,7 +131,7 @@ export default function PaymentGate({ children, feature, onUnlocked }: PaymentGa
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Lifetime access - no subscriptions</span>
+              <span>Pay once · Download your resume · No subscriptions</span>
             </div>
           </div>
         </div>
