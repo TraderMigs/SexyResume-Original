@@ -109,6 +109,9 @@ export default function ResumePreview({ resume, onUnlockClick }: ResumePreviewPr
           width: `${TEMPLATE_WIDTH_PX}px`,
           transformOrigin: 'top left',
           transform: `scale(${scale})`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
         }}>
           {/* Watermark */}
           {!isUnlocked && (
