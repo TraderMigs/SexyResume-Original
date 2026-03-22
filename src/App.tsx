@@ -10,6 +10,7 @@ import AuthModal from './components/AuthModal';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import LandingPage from './pages/LandingPage';
+import ResumeHookPreview from './components/ResumeHookPreview';
 import PersonalInfoForm from './components/PersonalInfoForm';
 import ExperienceForm from './components/ExperienceForm';
 import EducationForm from './components/EducationForm';
@@ -34,24 +35,25 @@ import {
 } from 'lucide-react';
 
 type ActiveTab = 'personal' | 'experience' | 'education' | 'skills' | 'projects' | 'template' | 'preview' | 'export';
-type PostAuthAction = 'upload' | 'tab' | 'export' | null;
+type PostAuthAction = 'goTemplate' | 'goPersonal' | 'goTab' | 'export' | null;
+
+// Three app states for logged-out users
+type AnonState = 'landing' | 'hook'; // 'hook' = after upload, showing teaser preview
 
 export default function App() {
   const { user } = useAuth();
   const { resume, saveResume } = useResume();
   const { trackPage, track } = useAnalytics();
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('preview');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('template');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMessage, setAuthModalMessage] = useState<string | undefined>(undefined);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showCoverLetterGenerator, setShowCoverLetterGenerator] = useState(false);
   const [postAuthAction, setPostAuthAction] = useState<PostAuthAction>(null);
-  const [postAuthTab, setPostAuthTab] = useState<ActiveTab | null>(null);
   const [hasConsent, setHasConsent] = useState(false);
   const [saveToast, setSaveToast] = useState<{ visible: boolean; message: string }>({ visible: false, message: '' });
-
-  // Has the user uploaded/started a resume (anon or authed)
-  const [hasResume, setHasResume] = useState(false);
+  const [anonState, setAnonState] = useState<AnonState>('landing');
 
   const [resumeData, setResumeData] = useState<Resume>({
     id: '',
@@ -59,28 +61,23 @@ export default function App() {
     experience: [], education: [], skills: [], projects: [],
     template: 'modern',
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   });
 
-  useEffect(() => {
-    if (resume) {
-      setResumeData(resume);
-      setHasResume(true);
-    }
-  }, [resume]);
-
+  useEffect(() => { if (resume) setResumeData(resume); }, [resume]);
   useEffect(() => { trackPage('/', 'Resume Builder'); }, [trackPage]);
 
   // After sign-in, execute pending action
   useEffect(() => {
     if (user && postAuthAction) {
-      if (postAuthAction === 'upload') setShowUploadModal(true);
-      if (postAuthAction === 'tab' && postAuthTab) setActiveTab(postAuthTab);
+      if (postAuthAction === 'goTemplate') setActiveTab('template');
+      if (postAuthAction === 'goPersonal') setActiveTab('personal');
       if (postAuthAction === 'export') setActiveTab('export');
+      if (postAuthAction === 'goTab') { /* tab already set */ }
       setPostAuthAction(null);
-      setPostAuthTab(null);
+      setAuthModalMessage(undefined);
     }
-  }, [user, postAuthAction, postAuthTab]);
+  }, [user, postAuthAction]);
 
   const handleConsentChange = (consents: ConsentPreferences) => {
     setHasConsent(consents.analytics);
@@ -118,26 +115,31 @@ export default function App() {
     setResumeData(u); await saveResume(u); showSaveConfirmation('Template selected!');
   };
 
+  // Upload completes → show hook preview on the landing
   const handleResumeUpload = useCallback((uploadedData: Partial<Resume>) => {
     const u = { ...resumeData, ...uploadedData, updatedAt: new Date().toISOString() };
     setResumeData(u);
     saveResume(u);
-    setHasResume(true);
     track('resume_uploaded', { hasData: !!uploadedData });
     showSaveConfirmation('Resume loaded!');
-    // Drop straight to preview — they see their resume immediately
-    setActiveTab('preview');
+    // Stay on landing but switch to hook state — don't go to builder yet
+    setAnonState('hook');
   }, [resumeData, saveResume, track]);
 
-  // Gate: tabs that require auth
-  const handleTabClick = (tab: ActiveTab) => {
-    if (!user && tab !== 'preview' && tab !== 'template') {
-      setPostAuthAction('tab');
-      setPostAuthTab(tab);
-      setShowAuthModal(true);
-      return;
-    }
-    setActiveTab(tab);
+  // Upload CTA on landing — no auth gate, open modal directly
+  const handleLandingUpload = () => setShowUploadModal(true);
+
+  // Build from scratch — gate behind sign-in with custom copy
+  const handleLandingBuild = () => {
+    setPostAuthAction('goPersonal');
+    setAuthModalMessage('Log in to get all the free tools to build your sexy resume with.');
+    setShowAuthModal(true);
+  };
+
+  // Hook preview sign-in → land on Template tab
+  const handleHookSignIn = () => {
+    setPostAuthAction('goTemplate');
+    setShowAuthModal(true);
   };
 
   const handleUnlockClick = () => {
@@ -149,11 +151,15 @@ export default function App() {
     if (user) setShowCoverLetterGenerator(true);
   };
 
-  // Landing page CTAs
-  const handleLandingUpload = () => setShowUploadModal(true); // no auth gate — let them upload first
-  const handleLandingBuild = () => {
-    if (!user) { setPostAuthAction('tab'); setPostAuthTab('personal'); setShowAuthModal(true); }
-    else setActiveTab('personal');
+  // Locked tabs require auth
+  const handleTabClick = (tab: ActiveTab) => {
+    if (!user && tab !== 'preview' && tab !== 'template') {
+      setPostAuthAction('goTab');
+      setActiveTab(tab); // will be applied after sign-in
+      setShowAuthModal(true);
+      return;
+    }
+    setActiveTab(tab);
   };
 
   const tabs = [
@@ -166,9 +172,6 @@ export default function App() {
     { id: 'preview' as const, label: 'Preview', icon: Eye, requiresAuth: false },
     { id: 'export' as const, label: 'Export', icon: Download, requiresAuth: true },
   ];
-
-  // What to show in main area
-  const showBuilder = hasResume || user;
 
   return (
     <ErrorBoundary>
@@ -189,9 +192,10 @@ export default function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="*" element={
 
-              !showBuilder ? (
-                // ── NO RESUME YET → LANDING ──────────────────────────────
+              !user ? (
+                // ── LOGGED OUT ─────────────────────────────────────────────
                 <div className="flex flex-col min-h-screen">
+                  {/* Minimal landing header */}
                   <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
                     <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                       <img src="/New Header Logo copy copy.png" alt="SexyResume" className="h-12 w-auto" />
@@ -206,7 +210,24 @@ export default function App() {
                   </header>
 
                   <main className="flex-1">
-                    <LandingPage onSignIn={handleLandingBuild} onUpload={handleLandingUpload} />
+                    {anonState === 'landing' ? (
+                      // ── LANDING ──────────────────────────────────────────
+                      <LandingPage
+                        onSignIn={handleLandingBuild}
+                        onUpload={handleLandingUpload}
+                      />
+                    ) : (
+                      // ── HOOK PREVIEW (after upload, still on landing) ────
+                      <div
+                        className="min-h-screen py-16"
+                        style={{ background: 'linear-gradient(135deg,#fdf4ff,#f5f3ff,#eff6ff)' }}
+                      >
+                        <ResumeHookPreview
+                          resume={resumeData}
+                          onSignIn={handleHookSignIn}
+                        />
+                      </div>
+                    )}
                   </main>
 
                   <footer className="bg-gray-900 text-gray-400 py-10 px-6">
@@ -220,60 +241,50 @@ export default function App() {
                     </div>
                   </footer>
 
-                  <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+                  {/* Upload modal opens on top of landing — no redirect */}
                   {showUploadModal && (
-                    <ResumeUpload onResumeLoaded={handleResumeUpload} onClose={() => setShowUploadModal(false)} />
+                    <ResumeUpload
+                      onResumeLoaded={handleResumeUpload}
+                      onClose={() => setShowUploadModal(false)}
+                    />
                   )}
+
+                  <AuthModal
+                    isOpen={showAuthModal}
+                    onClose={() => { setShowAuthModal(false); setAuthModalMessage(undefined); }}
+                    customMessage={authModalMessage}
+                  />
                   <CookieConsent onConsentChange={handleConsentChange} />
                 </div>
 
               ) : (
-                // ── HAS RESUME (anon or authed) → BUILDER ────────────────
+                // ── LOGGED IN → BUILDER ────────────────────────────────────
                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen flex flex-col overflow-x-hidden">
                   <Header onAuthClick={() => setShowAuthModal(true)} />
 
                   <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 w-full">
-
-                    {/* Anon nudge banner */}
-                    {!user && (
-                      <div className="mb-6 rounded-xl p-4 flex items-center justify-between gap-4"
-                        style={{ background: 'linear-gradient(135deg,#fdf4ff,#eff6ff)', border: '1px solid #e9d5ff' }}>
-                        <div>
-                          <p className="font-bold text-purple-900 text-sm">Your resume is ready! 🎉</p>
-                          <p className="text-purple-600 text-xs mt-0.5">Sign in to edit, choose templates, and unlock your download.</p>
-                        </div>
-                        <button
-                          onClick={() => setShowAuthModal(true)}
-                          className="px-4 py-2 rounded-xl text-white text-sm font-bold whitespace-nowrap flex-shrink-0"
-                          style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed)' }}
-                        >
-                          Sign In / Sign Up
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Upload another button (logged in only) */}
-                    {user && (
-                      <div className="mb-6">
-                        <button
-                          onClick={() => setShowUploadModal(true)}
-                          className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-white text-sm font-bold shadow-md transition-all hover:scale-105"
-                          style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed)' }}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                          <span>Upload Resume</span>
-                        </button>
-                      </div>
-                    )}
+                    <div className="mb-6">
+                      <button
+                        onClick={() => setShowUploadModal(true)}
+                        className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl text-white text-sm font-bold shadow-md transition-all hover:scale-105"
+                        style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed)' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="17 8 12 3 7 8"/>
+                          <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span>Upload Resume</span>
+                      </button>
+                    </div>
 
                     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                      {/* Tab bar */}
                       <div
                         className="flex overflow-x-auto gap-1 p-3 bg-gray-50 border-b border-gray-200"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                       >
                         {tabs.map(({ id, label, icon: Icon, requiresAuth }) => {
-                          const isLocked = requiresAuth && !user;
+                          const locked = requiresAuth && !user;
                           const isActive = activeTab === id;
                           return (
                             <button
@@ -282,12 +293,12 @@ export default function App() {
                               className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-colors font-medium whitespace-nowrap ${
                                 isActive
                                   ? 'bg-purple-600 text-white shadow-sm'
-                                  : isLocked
+                                  : locked
                                     ? 'text-gray-400 hover:bg-gray-100'
                                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                               }`}
                             >
-                              {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Icon className="w-4 h-4" />}
+                              {locked ? <Lock className="w-3.5 h-3.5" /> : <Icon className="w-4 h-4" />}
                               <span className="text-xs sm:text-sm">{label}</span>
                             </button>
                           );
@@ -305,8 +316,7 @@ export default function App() {
                             resume={resumeData}
                             selectedTemplate={resumeData.template}
                             onTemplateChange={updateTemplate}
-                            requiresAuthForMore={!user}
-                            onAuthRequired={() => setShowAuthModal(true)}
+                            requiresAuthForMore={false}
                           />
                         )}
                         {activeTab === 'preview' && (
@@ -324,11 +334,20 @@ export default function App() {
                   <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
                   {showUploadModal && (
-                    <ResumeUpload onResumeLoaded={handleResumeUpload} onClose={() => setShowUploadModal(false)} />
+                    <ResumeUpload
+                      onResumeLoaded={(data) => {
+                        handleResumeUpload(data);
+                        setActiveTab('template');
+                      }}
+                      onClose={() => setShowUploadModal(false)}
+                    />
                   )}
 
                   {showCoverLetterGenerator && user && (
-                    <CoverLetterGenerator resume={resumeData} onClose={() => setShowCoverLetterGenerator(false)} />
+                    <CoverLetterGenerator
+                      resume={resumeData}
+                      onClose={() => setShowCoverLetterGenerator(false)}
+                    />
                   )}
 
                   <CookieConsent onConsentChange={handleConsentChange} />
