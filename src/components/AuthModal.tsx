@@ -28,6 +28,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
     try {
       if (mode === 'signup') {
         await signUp(email, password, fullName);
+        onClose();
       } else {
         await signIn(email, password);
         onClose();
@@ -138,7 +139,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
             </div>
             {mode === 'signup' && (
               <p className="text-xs text-gray-600 mt-1">
-                Password must be at least 12 characters with uppercase, lowercase, numbers, and special characters
+                Minimum 6 characters
               </p>
             )}
           </div>
@@ -177,7 +178,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
                 <strong>Privacy Notice:</strong> Your resume data is encrypted and automatically 
-                deleted after 24 hours. We never store your personal information permanently.
+                free to create. Sign in to save your resume and access AI features.
               </p>
             </div>
           </div>
