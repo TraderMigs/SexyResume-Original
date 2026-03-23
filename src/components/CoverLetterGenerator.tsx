@@ -33,7 +33,6 @@ export default function CoverLetterGenerator({ resume, onClose }: CoverLetterGen
     tone: 'neutral',
     length: 'standard',
     keywords: [],
-    matchResumeTemplate: true
   });
 
   const [keywordInput, setKeywordInput] = useState('');
@@ -300,15 +299,7 @@ export default function CoverLetterGenerator({ resume, onClose }: CoverLetterGen
                   placeholder="React, leadership, project management (comma-separated)"
                 />
               </div>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={request.matchResumeTemplate}
-                  onChange={(e) => updateRequest('matchResumeTemplate', e.target.checked)}
-                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                />
-                <span className="text-sm text-gray-700">Match resume template styling</span>
-              </label>
+
             </div>
           )}
 
