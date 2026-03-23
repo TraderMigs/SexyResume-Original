@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Resume } from '../types/resume';
 import { usePayments } from '../hooks/usePayments';
+import { useAuth } from '../contexts/AuthContext';
 import { Download, FileText, File, Sparkles, CheckCircle, Loader, AlertCircle } from 'lucide-react';
 
 interface DownloadTabProps {
@@ -10,6 +11,7 @@ interface DownloadTabProps {
 
 export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadTabProps) {
   const { entitlement, refreshEntitlement } = usePayments();
+  const { session } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
   const [exportResult, setExportResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-resume`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
