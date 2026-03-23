@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Loader, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Loader, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 
 // ── Static industry data ──────────────────────────────────────────────────────
 const INDUSTRIES = [
@@ -149,6 +149,89 @@ const INDUSTRIES = [
   }
 ];
 
+// ── Section styling map ───────────────────────────────────────────────────────
+const SECTION_STYLES: Record<string, { bg: string; border: string; label: string; emoji: string }> = {
+  'MALE ATTIRE':       { bg: '#eff6ff', border: '#3b82f6', label: 'Male Attire',      emoji: '👔' },
+  'FEMALE ATTIRE':     { bg: '#fdf4ff', border: '#d946ef', label: 'Female Attire',    emoji: '👗' },
+  'GROOMING AND HAIR': { bg: '#f0fdf4', border: '#16a34a', label: 'Grooming & Hair',  emoji: '✂️' },
+  'COLOR GUIDE':       { bg: '#fffbeb', border: '#f59e0b', label: 'Color Guide',       emoji: '🎨' },
+  'PRO TIPS':          { bg: '#fef2f2', border: '#ef4444', label: 'Pro Tips',          emoji: '⚡' },
+};
+
+// ── Styled result renderer ────────────────────────────────────────────────────
+function renderStyledResult(raw: string, career: string) {
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+  type Section = { key: string; items: string[] };
+  const sections: Section[] = [];
+  let currentSection: Section | null = null;
+  let title = '';
+
+  for (const line of lines) {
+    if (line.startsWith('# ')) { title = line.replace(/^#+\s*/, ''); continue; }
+    if (line.startsWith('## ')) {
+      const key = line.replace(/^#+\s*/, '').toUpperCase();
+      currentSection = { key, items: [] };
+      sections.push(currentSection);
+      continue;
+    }
+    if (currentSection) currentSection.items.push(line);
+  }
+
+  const renderLine = (line: string, idx: number) => {
+    const match = line.match(/^\*\*(.+?)\*\*[:\s]+(.+)$/);
+    if (match) {
+      return (
+        <div key={idx} className="flex gap-3 py-2 border-b border-gray-100 last:border-0">
+          <span className="font-bold text-gray-800 text-sm shrink-0" style={{ minWidth: '130px' }}>{match[1]}</span>
+          <span className="text-gray-600 text-sm leading-relaxed">{match[2]}</span>
+        </div>
+      );
+    }
+    return (
+      <p key={idx} className="text-gray-600 text-sm leading-relaxed py-1.5">
+        {line.replace(/\*\*/g, '')}
+      </p>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl px-5 py-4 flex items-center gap-3"
+        style={{ background: 'linear-gradient(135deg,#7c3aed,#d946ef)' }}>
+        <Sparkles size={18} color="white" />
+        <div>
+          <p className="text-white font-black text-base capitalize">{career}</p>
+          {title && title.toLowerCase() !== career.toLowerCase() && (
+            <p className="text-purple-200 text-xs mt-0.5">{title}</p>
+          )}
+        </div>
+      </div>
+
+      {sections.map((section, si) => {
+        const style = SECTION_STYLES[section.key] || {
+          bg: '#f8fafc', border: '#94a3b8',
+          label: section.key.charAt(0) + section.key.slice(1).toLowerCase(),
+          emoji: '📋'
+        };
+        return (
+          <div key={si} className="rounded-2xl overflow-hidden"
+            style={{ border: `1.5px solid ${style.border}` }}>
+            <div className="px-4 py-3 flex items-center gap-2"
+              style={{ background: style.bg, borderBottom: `1.5px solid ${style.border}` }}>
+              <span className="text-base">{style.emoji}</span>
+              <span className="font-black text-gray-900 text-sm">{style.label}</span>
+            </div>
+            <div className="px-4 py-3 bg-white">
+              {section.items.map((item, ii) => renderLine(item, ii))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Industry Card ─────────────────────────────────────────────────────────────
 function IndustryCard({ industry }: { industry: typeof INDUSTRIES[0] }) {
   const [open, setOpen] = useState(false);
@@ -157,11 +240,9 @@ function IndustryCard({ industry }: { industry: typeof INDUSTRIES[0] }) {
 
   return (
     <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all hover:shadow-md">
-      <button
-        onClick={() => setOpen(!open)}
+      <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-4 text-left"
-        style={{ background: `linear-gradient(135deg, ${industry.color}, ${industry.accent})` }}
-      >
+        style={{ background: `linear-gradient(135deg, ${industry.color}, ${industry.accent})` }}>
         <span className="font-bold text-white text-sm">{industry.label}</span>
         {open ? <ChevronUp size={16} color="white" /> : <ChevronDown size={16} color="white" />}
       </button>
@@ -170,20 +251,13 @@ function IndustryCard({ industry }: { industry: typeof INDUSTRIES[0] }) {
         <div className="bg-white px-5 py-4">
           <div className="flex gap-2 mb-4">
             {(['male', 'female'] as const).map(g => (
-              <button
-                key={g}
-                onClick={() => setGender(g)}
+              <button key={g} onClick={() => setGender(g)}
                 className="px-4 py-1.5 rounded-full text-xs font-bold transition-all"
-                style={{
-                  background: gender === g ? industry.accent : '#f3f4f6',
-                  color: gender === g ? 'white' : '#6b7280'
-                }}
-              >
+                style={{ background: gender === g ? industry.accent : '#f3f4f6', color: gender === g ? 'white' : '#6b7280' }}>
                 {g === 'male' ? 'Male' : 'Female'}
               </button>
             ))}
           </div>
-
           <div className="space-y-3 text-sm">
             <div>
               <p className="font-bold text-gray-800 mb-1">Attire</p>
@@ -197,7 +271,8 @@ function IndustryCard({ industry }: { industry: typeof INDUSTRIES[0] }) {
               <p className="font-bold text-gray-800 mb-1">Colors</p>
               <p className="text-gray-600 leading-relaxed">{data.color}</p>
             </div>
-            <div className="rounded-xl px-4 py-3" style={{ background: '#faf5ff', borderLeft: `3px solid ${industry.accent}` }}>
+            <div className="rounded-xl px-4 py-3"
+              style={{ background: '#faf5ff', borderLeft: `3px solid ${industry.accent}` }}>
               <p className="text-xs font-semibold text-purple-700 mb-1">Pro Tips</p>
               <p className="text-gray-600 text-xs leading-relaxed">{data.notes}</p>
             </div>
@@ -211,15 +286,17 @@ function IndustryCard({ industry }: { industry: typeof INDUSTRIES[0] }) {
 // ── AI Career Search ──────────────────────────────────────────────────────────
 function AICareerSearch() {
   const [query, setQuery] = useState('');
-  const [result, setResult] = useState('');
+  const [rawResult, setRawResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searched, setSearched] = useState('');
 
   const handleSearch = async () => {
     if (!query.trim()) return;
     setLoading(true);
     setError('');
-    setResult('');
+    setRawResult('');
+    setSearched('');
     try {
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/attire-search`, {
         method: 'POST',
@@ -231,8 +308,9 @@ function AICareerSearch() {
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Search failed');
-      setResult(data.result || '');
-    } catch (e: any) {
+      setRawResult(data.result || '');
+      setSearched(query.trim());
+    } catch {
       setError('Search failed. Try again in a moment.');
     } finally {
       setLoading(false);
@@ -240,54 +318,37 @@ function AICareerSearch() {
   };
 
   return (
-    <div className="rounded-2xl border-2 border-purple-100 overflow-hidden" style={{ background: 'linear-gradient(135deg,#fdf4ff,#eff6ff)' }}>
+    <div className="rounded-2xl border-2 border-purple-100 overflow-hidden"
+      style={{ background: 'linear-gradient(135deg,#fdf4ff,#eff6ff)' }}>
       <div className="px-6 py-5 border-b border-purple-100">
         <h3 className="font-black text-gray-900 text-base mb-1">Search Any Career</h3>
         <p className="text-sm text-gray-500">Type any job title and get AI-powered attire recommendations for 2026.</p>
       </div>
-
       <div className="px-6 py-5">
         <div className="flex gap-3">
-          <input
-            type="text"
-            value={query}
+          <input type="text" value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !loading && handleSearch()}
             placeholder="e.g. nurse, software engineer, chef, pilot..."
             className="flex-1 px-4 py-3 rounded-xl border-2 border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
           />
-          <button
-            onClick={handleSearch}
-            disabled={!query.trim() || loading}
+          <button onClick={handleSearch} disabled={!query.trim() || loading}
             className="flex items-center gap-2 px-5 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105 disabled:opacity-50"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#d946ef)' }}
-          >
+            style={{ background: 'linear-gradient(135deg,#7c3aed,#d946ef)' }}>
             {loading ? <Loader size={16} className="animate-spin" /> : <Search size={16} />}
             {loading ? 'Searching...' : 'Search'}
           </button>
         </div>
-
-        {error && (
-          <p className="mt-3 text-sm text-red-500">{error}</p>
-        )}
-
-        {result && (
-          <div className="mt-5 rounded-xl bg-white border border-purple-100 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full" style={{ background: '#d946ef' }} />
-              <p className="text-xs font-bold text-purple-600 uppercase tracking-widest">AI Recommendations: {query}</p>
-            </div>
-            <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {result}
-            </div>
-          </div>
+        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+        {rawResult && searched && (
+          <div className="mt-5">{renderStyledResult(rawResult, searched)}</div>
         )}
       </div>
     </div>
   );
 }
 
-// ── Main BigDayAttire ─────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function BigDayAttire() {
   return (
     <div className="w-full max-w-3xl mx-auto pb-20">
@@ -297,21 +358,15 @@ export default function BigDayAttire() {
           2026 interview dress code guide — attire, grooming, hair, color and style by industry. Tap any category to expand.
         </p>
       </div>
-
-      <div className="mb-8">
-        <AICareerSearch />
-      </div>
-
+      <div className="mb-8"><AICareerSearch /></div>
       <div className="mb-4">
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Browse by Industry</p>
         <div className="flex flex-col gap-3">
-          {INDUSTRIES.map(industry => (
-            <IndustryCard key={industry.id} industry={industry} />
-          ))}
+          {INDUSTRIES.map(industry => <IndustryCard key={industry.id} industry={industry} />)}
         </div>
       </div>
-
-      <div className="mt-8 rounded-2xl px-5 py-4 text-center" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+      <div className="mt-8 rounded-2xl px-5 py-4 text-center"
+        style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
         <p className="text-xs text-gray-400 leading-relaxed">
           Attire recommendations reflect 2026 professional standards. When in doubt, dress one level above what you think is required. First impressions are formed in under 7 seconds.
         </p>
