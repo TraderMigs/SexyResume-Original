@@ -202,7 +202,7 @@ export default function App() {
     { id: 'projects' as const, label: 'Projects', icon: FolderOpen, requiresAuth: true },
     { id: 'template' as const, label: 'Template', icon: Palette, requiresAuth: false },
     { id: 'preview' as const, label: 'Preview', icon: Eye, requiresAuth: false },
-    { id: 'export' as const, label: 'Export', icon: Download, requiresAuth: true },
+    ...(!entitlement?.exportUnlocked ? [{ id: 'export' as const, label: 'Export', icon: Download, requiresAuth: true }] : []),
     ...(entitlement?.exportUnlocked ? [{ id: 'download' as const, label: 'Download', icon: CheckCircle, requiresAuth: true }] : []),
   ];
 
