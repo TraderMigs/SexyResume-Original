@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Resume } from '../types/resume';
 import { usePayments } from '../hooks/usePayments';
 import { useAuth } from '../contexts/AuthContext';
-import { Download, FileText, File, Sparkles, CheckCircle, Loader, AlertCircle } from 'lucide-react';
+import { getAllTemplates } from '../lib/templateRegistry';
+import { renderTemplate } from '../lib/templateRenderer';
+import { Download, FileText, File, Sparkles, CheckCircle, Loader, AlertCircle, Zap } from 'lucide-react';
 
 interface DownloadTabProps {
   resume: Resume;
@@ -18,7 +20,7 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
   const [lastFormat, setLastFormat] = useState<string>('');
   const [pollCount, setPollCount] = useState(0);
 
-  // On mount: if not yet unlocked, poll until it flips (handles race condition after payment redirect)
+  // On mount: if not yet unlocked, poll until it flips
   useEffect(() => {
     if (entitlement?.exportUnlocked) return;
     if (pollCount >= 8) return;
@@ -29,17 +31,33 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
     return () => clearTimeout(t);
   }, [entitlement, pollCount]);
 
-  const handleDownload = async (format: 'pdf' | 'docx' | 'txt') => {
+  const getRenderedTemplate = () => {
+    try {
+      if (!resume?.personalInfo) return { html: '', css: '' };
+      const templates = getAllTemplates();
+      const template = templates.find(t => t.id === resume.template) || templates[0];
+      if (!template) return { html: '', css: '' };
+      const rendered = renderTemplate(resume, template);
+      return { html: rendered.html, css: rendered.css };
+    } catch {
+      return { html: '', css: '' };
+    }
+  };
+
+  const handleDownload = async (format: 'pdf' | 'docx' | 'txt' | 'ats') => {
     if (!resume.id) { setError('Please save your resume before downloading.'); return; }
+    if (!session?.access_token) { setError('Session expired. Please sign in again.'); return; }
     setIsExporting(true);
     setError(null);
     setExportResult(null);
     setLastFormat(format);
     try {
+      const { html: renderedHtml, css: renderedCss } = format === 'pdf' ? getRenderedTemplate() : { html: '', css: '' };
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-resume`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -47,6 +65,8 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
           format,
           template: resume.template || 'modern',
           watermark: false,
+          renderedHtml,
+          renderedCss,
         }),
       });
       if (!response.ok) {
@@ -55,13 +75,12 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
       }
       const result = await response.json();
       if (result.downloadUrl) {
-        // Fetch the file as a blob so download happens in-browser without navigating away
         const fileResponse = await fetch(result.downloadUrl);
         const blob = await fileResponse.blob();
         const objectUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = objectUrl;
-        link.download = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.${format}`;
+        link.download = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.${format === 'ats' ? 'txt' : format}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -76,7 +95,6 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
   };
 
   if (!entitlement?.exportUnlocked) {
-    // Still polling — show spinner
     if (pollCount < 8) {
       return (
         <div className="flex flex-col items-center justify-center py-16 text-center px-6">
@@ -97,7 +115,6 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
         </div>
       );
     }
-    // Polling exhausted — show locked message
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center px-6">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
@@ -137,11 +154,12 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
 
       {/* Download buttons */}
       <h3 className="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Download Format</h3>
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-6">
         {([
-          { fmt: 'pdf' as const, label: 'PDF', desc: 'Best for sharing', icon: <FileText size={22} /> },
-          { fmt: 'docx' as const, label: 'Word', desc: 'Editable format', icon: <File size={22} /> },
-          { fmt: 'txt' as const, label: 'Plain Text', desc: 'Simple & clean', icon: <FileText size={22} /> },
+          { fmt: 'pdf' as const, label: 'PDF', desc: 'Styled · Best for sharing', icon: <FileText size={22} /> },
+          { fmt: 'docx' as const, label: 'Word', desc: 'Editable · Clean format', icon: <File size={22} /> },
+          { fmt: 'txt' as const, label: 'Plain Text', desc: 'Simple · Universal', icon: <FileText size={22} /> },
+          { fmt: 'ats' as const, label: 'ATS-Optimized', desc: 'For job portals & scanners', icon: <Zap size={22} /> },
         ]).map(({ fmt, label, desc, icon }) => (
           <button
             key={fmt}
@@ -155,7 +173,7 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
               : <span style={{ color: '#d946ef' }}>{icon}</span>
             }
             <span className="text-sm font-bold mt-2 text-gray-800">{label}</span>
-            <span className="text-xs text-gray-400 mt-0.5">{desc}</span>
+            <span className="text-xs text-gray-400 mt-0.5 text-center">{desc}</span>
           </button>
         ))}
       </div>
@@ -181,7 +199,7 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
                 const objectUrl = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = objectUrl;
-                link.download = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.${lastFormat}`;
+                link.download = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.${lastFormat === 'ats' ? 'txt' : lastFormat}`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -203,7 +221,7 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
           <Sparkles size={20} style={{ color: '#0ba5d9' }} />
           <div className="text-left">
             <p className="font-bold text-gray-800 text-sm">Generate a Cover Letter</p>
-            <p className="text-xs text-gray-400">AI writes a tailored cover letter for you — free</p>
+            <p className="text-xs text-gray-400">AI writes a tailored cover letter for you - free</p>
           </div>
         </button>
       </div>
