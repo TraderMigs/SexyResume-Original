@@ -4,7 +4,7 @@ import { usePayments } from '../hooks/usePayments';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllTemplates } from '../lib/templateRegistry';
 import { renderTemplate } from '../lib/templateRenderer';
-import { Lock, FileText, File, Zap, Download, Loader } from 'lucide-react';
+import { Lock, FileText, File, Zap, Download, Loader, CheckCircle } from 'lucide-react';
 
 interface FormatPreviewProps {
   resume: Resume;
@@ -15,7 +15,7 @@ interface FormatPreviewProps {
 const TEMPLATE_WIDTH_PX = 816;
 
 // ── PDF Preview ───────────────────────────────────────────────────────────────
-function PDFPreviewCard({ resume, isUnlocked, onUnlockClick, onDownload }: any) {
+function PDFPreviewCard({ resume, isUnlocked, onDownload }: any) {
   const [html, setHtml] = useState('');
   const [css, setCss] = useState('');
   const [scale, setScale] = useState(1);
@@ -60,12 +60,11 @@ function PDFPreviewCard({ resume, isUnlocked, onUnlockClick, onDownload }: any) 
       </div>
 
       <div ref={containerRef} className="relative border-2 border-purple-100 rounded-xl overflow-hidden shadow-lg bg-white"
-        style={{ height: scaledHeight ? `${scaledHeight}px` : '500px', maxWidth: '816px', margin: '0 auto', width: '100%' }}>
+        style={{ height: scaledHeight ? `${scaledHeight}px` : 'auto', maxWidth: '816px', margin: '0 auto', width: '100%' }}>
         {html ? (
           <>
             <style dangerouslySetInnerHTML={{ __html: css }} />
             <div style={{ width: `${TEMPLATE_WIDTH_PX}px`, transformOrigin: 'top left', transform: `scale(${scale})`, position: 'absolute', top: 0, left: 0 }}>
-              {/* Watermark */}
               <div style={{ position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', inset: '-100%', width: '300%', height: '300%', display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start', transform: 'rotate(-35deg)', transformOrigin: 'center center' }}>
                   {Array.from({ length: 80 }).map((_, i) => (
@@ -73,82 +72,78 @@ function PDFPreviewCard({ resume, isUnlocked, onUnlockClick, onDownload }: any) 
                   ))}
                 </div>
               </div>
-              <div style={{ userSelect: 'none', WebkitUserSelect: 'none', position: 'relative', zIndex: 1 }} dangerouslySetInnerHTML={{ __html: html }} />
+              <div ref={contentRef} style={{ userSelect: 'none', WebkitUserSelect: 'none', position: 'relative', zIndex: 1 }} dangerouslySetInnerHTML={{ __html: html }} />
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" /></div>
+          <div className="flex items-center justify-center" style={{ height: '600px' }}><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" /></div>
         )}
 
-        {/* Blur gate */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0.7) 25%,rgba(255,255,255,0.97) 50%,white 70%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: '1.5rem' }}>
-          {isUnlocked ? (
-            <button onClick={() => onDownload('pdf')} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}>
+        {/* Blur gate — starts at 30% from bottom, shows 70% of content */}
+        {!isUnlocked && scaledHeight && (
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0.85) 50%,white 100%)', pointerEvents: 'none' }} />
+        )}
+        {isUnlocked && (
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', zIndex: 20, display: 'flex', justifyContent: 'center' }}>
+            <button onClick={() => onDownload('pdf')} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105 shadow-lg" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}>
               <Download size={16} /> Download PDF
             </button>
-          ) : (
-            <div className="text-center px-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}><Lock size={16} color="white" /></div>
-              <p className="text-sm font-bold text-gray-900 mb-1">Unlock to download</p>
-              <button onClick={onUnlockClick} className="px-5 py-2.5 rounded-xl text-white font-bold text-sm transition-all hover:scale-105" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}>Unlock Now — $7.00</button>
-              <p className="text-xs text-gray-400 mt-1">One-time · No subscription</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 // ── Word Preview ──────────────────────────────────────────────────────────────
-function WordPreviewCard({ resume, isUnlocked, onUnlockClick, onDownload }: any) {
-  const { personalInfo, experience, education, skills, projects } = resume;
+function WordPreviewCard({ resume, isUnlocked, onDownload }: any) {
+  const { personalInfo, experience, education, skills } = resume;
 
   const wordHtml = `
-    <div style="font-family: 'Calibri', 'Arial', sans-serif; padding: 48px 56px; color: #1a1a1a; line-height: 1.5; background: white; min-height: 900px;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="font-size: 26px; font-weight: 700; margin: 0 0 6px; color: #1a1a1a;">${personalInfo?.fullName || ''}</h1>
+    <div style="font-family: 'Calibri', 'Arial', sans-serif; padding: 56px 64px; color: #1a1a1a; line-height: 1.6; background: white;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="font-size: 28px; font-weight: 700; margin: 0 0 8px; color: #1a1a1a;">${personalInfo?.fullName || ''}</h1>
         <p style="font-size: 12px; color: #555; margin: 0;">${[personalInfo?.email, personalInfo?.phone, personalInfo?.location].filter(Boolean).join('  |  ')}</p>
-        ${personalInfo?.linkedin ? `<p style="font-size: 12px; color: #555; margin: 2px 0 0;">${personalInfo.linkedin}</p>` : ''}
+        ${personalInfo?.linkedin ? `<p style="font-size: 12px; color: #555; margin: 4px 0 0;">${personalInfo.linkedin}</p>` : ''}
       </div>
-      <hr style="border: none; border-top: 2px solid #1a1a1a; margin: 0 0 14px;" />
+      <hr style="border: none; border-top: 2px solid #1a1a1a; margin: 0 0 20px;" />
       ${personalInfo?.summary ? `
-        <div style="margin-bottom: 16px;">
-          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1a1a1a; margin: 0 0 6px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Professional Summary</h2>
-          <p style="font-size: 11px; color: #333; margin: 0;">${personalInfo.summary}</p>
+        <div style="margin-bottom: 20px;">
+          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a1a1a; margin: 0 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Professional Summary</h2>
+          <p style="font-size: 12px; color: #333; margin: 0; line-height: 1.6;">${personalInfo.summary}</p>
         </div>` : ''}
       ${experience?.length > 0 ? `
-        <div style="margin-bottom: 16px;">
-          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1a1a1a; margin: 0 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Work Experience</h2>
+        <div style="margin-bottom: 20px;">
+          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a1a1a; margin: 0 0 12px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Work Experience</h2>
           ${experience.map((exp: any) => `
-            <div style="margin-bottom: 12px;">
+            <div style="margin-bottom: 16px;">
               <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <p style="font-size: 12px; font-weight: 700; margin: 0;">${exp.position}</p>
-                <p style="font-size: 10px; color: #555; margin: 0; white-space: nowrap;">${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}</p>
+                <p style="font-size: 13px; font-weight: 700; margin: 0;">${exp.position}</p>
+                <p style="font-size: 11px; color: #555; margin: 0; white-space: nowrap;">${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}</p>
               </div>
-              <p style="font-size: 11px; font-style: italic; color: #444; margin: 1px 0 4px;">${exp.company}</p>
-              ${exp.description ? `<p style="font-size: 11px; color: #333; margin: 0 0 3px;">${exp.description}</p>` : ''}
-              ${exp.achievements?.filter((a: string) => a.trim()).map((a: string) => `<p style="font-size: 11px; color: #333; margin: 2px 0 0; padding-left: 12px;">• ${a}</p>`).join('') || ''}
+              <p style="font-size: 12px; font-style: italic; color: #444; margin: 2px 0 6px;">${exp.company}</p>
+              ${exp.description ? `<p style="font-size: 12px; color: #333; margin: 0 0 4px;">${exp.description}</p>` : ''}
+              ${exp.achievements?.filter((a: string) => a.trim()).map((a: string) => `<p style="font-size: 12px; color: #333; margin: 3px 0 0; padding-left: 16px;">• ${a}</p>`).join('') || ''}
             </div>`).join('')}
         </div>` : ''}
       ${education?.length > 0 ? `
-        <div style="margin-bottom: 16px;">
-          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1a1a1a; margin: 0 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Education</h2>
+        <div style="margin-bottom: 20px;">
+          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a1a1a; margin: 0 0 12px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Education</h2>
           ${education.map((edu: any) => `
-            <div style="margin-bottom: 8px;">
+            <div style="margin-bottom: 12px;">
               <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <p style="font-size: 12px; font-weight: 700; margin: 0;">${edu.degree} in ${edu.field}</p>
-                <p style="font-size: 10px; color: #555; margin: 0;">${edu.startDate} - ${edu.endDate}</p>
+                <p style="font-size: 13px; font-weight: 700; margin: 0;">${edu.degree} in ${edu.field}</p>
+                <p style="font-size: 11px; color: #555; margin: 0;">${edu.startDate} - ${edu.endDate}</p>
               </div>
-              <p style="font-size: 11px; font-style: italic; color: #444; margin: 1px 0 0;">${edu.institution}</p>
-              ${edu.gpa ? `<p style="font-size: 11px; color: #555; margin: 1px 0 0;">GPA: ${edu.gpa}</p>` : ''}
+              <p style="font-size: 12px; font-style: italic; color: #444; margin: 2px 0 0;">${edu.institution}</p>
+              ${edu.gpa ? `<p style="font-size: 12px; color: #555; margin: 2px 0 0;">GPA: ${edu.gpa}</p>` : ''}
             </div>`).join('')}
         </div>` : ''}
       ${skills?.length > 0 ? `
-        <div style="margin-bottom: 16px;">
-          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1a1a1a; margin: 0 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Skills</h2>
+        <div style="margin-bottom: 20px;">
+          <h2 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a1a1a; margin: 0 0 12px; border-bottom: 1px solid #ddd; padding-bottom: 4px;">Skills</h2>
           ${Object.entries(skills.reduce((acc: any, s: any) => { if (!acc[s.category]) acc[s.category] = []; acc[s.category].push(s.name); return acc; }, {})).map(([cat, ss]: [string, any]) => `
-            <p style="font-size: 11px; color: #333; margin: 0 0 3px;"><strong>${cat}:</strong> ${ss.join(', ')}</p>`).join('')}
+            <p style="font-size: 12px; color: #333; margin: 0 0 4px;"><strong>${cat}:</strong> ${ss.join(', ')}</p>`).join('')}
         </div>` : ''}
     </div>
   `;
@@ -165,31 +160,26 @@ function WordPreviewCard({ resume, isUnlocked, onUnlockClick, onDownload }: any)
         </div>
       </div>
 
-      <div className="relative border-2 border-blue-100 rounded-xl overflow-hidden shadow-lg bg-white" style={{ height: '500px', maxWidth: '816px', margin: '0 auto', width: '100%' }}>
+      <div className="relative border-2 border-blue-100 rounded-xl overflow-hidden shadow-lg bg-white" style={{ maxWidth: '816px', margin: '0 auto', width: '100%' }}>
         <div style={{ userSelect: 'none', WebkitUserSelect: 'none' }} dangerouslySetInnerHTML={{ __html: wordHtml }} />
 
-        {/* Blur gate */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0.7) 25%,rgba(255,255,255,0.97) 50%,white 70%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: '1.5rem' }}>
-          {isUnlocked ? (
-            <button onClick={() => onDownload('docx')} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105" style={{ background: '#2b579a' }}>
+        {!isUnlocked && (
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0.85) 50%,white 100%)', pointerEvents: 'none' }} />
+        )}
+        {isUnlocked && (
+          <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <button onClick={() => onDownload('docx')} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105 shadow-lg" style={{ background: '#2b579a' }}>
               <Download size={16} /> Download Word
             </button>
-          ) : (
-            <div className="text-center px-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}><Lock size={16} color="white" /></div>
-              <p className="text-sm font-bold text-gray-900 mb-1">Unlock to download</p>
-              <button onClick={onUnlockClick} className="px-5 py-2.5 rounded-xl text-white font-bold text-sm transition-all hover:scale-105" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}>Unlock Now — $7.00</button>
-              <p className="text-xs text-gray-400 mt-1">One-time · No subscription</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 // ── ATS Preview ───────────────────────────────────────────────────────────────
-function ATSPreviewCard({ resume, isUnlocked, onUnlockClick, onDownload }: any) {
+function ATSPreviewCard({ resume, isUnlocked, onDownload }: any) {
   const { personalInfo, experience, education, skills } = resume;
 
   const atsText = [
@@ -223,28 +213,23 @@ function ATSPreviewCard({ resume, isUnlocked, onUnlockClick, onDownload }: any) 
         </div>
       </div>
 
-      <div className="relative border-2 border-green-100 rounded-xl overflow-hidden shadow-lg" style={{ height: '500px', maxWidth: '816px', margin: '0 auto', width: '100%', background: '#0d1117' }}>
-        <div style={{ padding: '24px', fontFamily: "'Courier New', Courier, monospace", fontSize: '11px', lineHeight: '1.7', color: '#e6edf3', whiteSpace: 'pre-wrap', userSelect: 'none', WebkitUserSelect: 'none' }}>
+      <div className="relative border-2 border-green-100 rounded-xl overflow-hidden shadow-lg" style={{ maxWidth: '816px', margin: '0 auto', width: '100%', background: '#0d1117' }}>
+        <div style={{ padding: '28px 32px', fontFamily: "'Courier New', Courier, monospace", fontSize: '12px', lineHeight: '1.8', color: '#e6edf3', whiteSpace: 'pre-wrap', userSelect: 'none', WebkitUserSelect: 'none' }}>
           <span style={{ color: '#7ee787' }}>{'// ATS-OPTIMIZED RESUME FORMAT'}</span>{'\n'}
           <span style={{ color: '#7ee787' }}>{'// Maximum compatibility with applicant tracking systems'}</span>{'\n\n'}
           {atsText}
         </div>
 
-        {/* Blur gate */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(13,17,23,0) 0%,rgba(13,17,23,0.7) 25%,rgba(13,17,23,0.97) 50%,#0d1117 70%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: '1.5rem' }}>
-          {isUnlocked ? (
-            <button onClick={() => onDownload('ats')} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105" style={{ background: '#16a34a' }}>
+        {!isUnlocked && (
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(13,17,23,0) 0%,rgba(13,17,23,0.85) 50%,#0d1117 100%)', pointerEvents: 'none' }} />
+        )}
+        {isUnlocked && (
+          <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
+            <button onClick={() => onDownload('ats')} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105 shadow-lg" style={{ background: '#16a34a' }}>
               <Download size={16} /> Download ATS Version
             </button>
-          ) : (
-            <div className="text-center px-4">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}><Lock size={16} color="white" /></div>
-              <p className="text-sm font-bold text-white mb-1">Unlock to download</p>
-              <button onClick={onUnlockClick} className="px-5 py-2.5 rounded-xl text-white font-bold text-sm transition-all hover:scale-105" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}>Unlock Now — $7.00</button>
-              <p className="text-xs text-gray-400 mt-1">One-time · No subscription</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -316,14 +301,45 @@ export default function FormatPreview({ resume, onUnlockClick, onDownload }: For
     <div className="w-full">
       <div className="mb-6">
         <h2 className="text-lg font-black text-gray-900">Choose Your Format</h2>
-        <p className="text-sm text-gray-400 mt-0.5">Each format is optimized for a different purpose. See exactly what you get before downloading.</p>
+        <p className="text-sm text-gray-400 mt-0.5">Scroll through each format below — see exactly what you get before downloading.</p>
       </div>
 
       <div className="flex flex-col gap-10">
-        <PDFPreviewCard resume={resume} isUnlocked={isUnlocked} onUnlockClick={onUnlockClick} onDownload={handleDownload} />
-        <WordPreviewCard resume={resume} isUnlocked={isUnlocked} onUnlockClick={onUnlockClick} onDownload={handleDownload} />
-        <ATSPreviewCard resume={resume} isUnlocked={isUnlocked} onUnlockClick={onUnlockClick} onDownload={handleDownload} />
+        <PDFPreviewCard resume={resume} isUnlocked={isUnlocked} onDownload={handleDownload} />
+        <WordPreviewCard resume={resume} isUnlocked={isUnlocked} onDownload={handleDownload} />
+        <ATSPreviewCard resume={resume} isUnlocked={isUnlocked} onDownload={handleDownload} />
       </div>
+
+      {/* Single unified unlock CTA — shown only when not yet unlocked */}
+      {!isUnlocked && (
+        <div className="mt-10 rounded-2xl p-8 text-center" style={{ background: 'linear-gradient(135deg,#fdf4ff,#eff6ff)', border: '2px solid #e9d5ff' }}>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}>
+            <Lock size={24} color="white" />
+          </div>
+          <h3 className="text-xl font-black text-gray-900 mb-1">Unlock All 3 Formats</h3>
+          <p className="text-sm text-gray-500 mb-6">PDF · Word · ATS-Optimized — all included, one payment, yours forever.</p>
+          <button
+            onClick={onUnlockClick}
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-white font-black text-base transition-all hover:scale-105 shadow-xl"
+            style={{ background: 'linear-gradient(135deg,#d946ef,#7c3aed,#0ba5d9)' }}
+          >
+            <Lock size={18} />
+            Unlock All 3 Formats — $7.00
+          </button>
+          <p className="text-xs text-gray-400 mt-3">One-time · No subscription · Download anytime</p>
+        </div>
+      )}
+
+      {/* Unlocked confirmation banner */}
+      {isUnlocked && (
+        <div className="mt-10 rounded-2xl p-6 text-center" style={{ background: 'linear-gradient(135deg,#f0fdf4,#ecfdf5)', border: '2px solid #86efac' }}>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <CheckCircle size={20} style={{ color: '#16a34a' }} />
+            <p className="font-bold text-green-800">All formats unlocked</p>
+          </div>
+          <p className="text-xs text-green-600">Click any format above to download · No watermarks · Download anytime</p>
+        </div>
+      )}
 
       {isDownloading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
