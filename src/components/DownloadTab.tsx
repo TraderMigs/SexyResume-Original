@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Resume } from '../types/resume';
 import { usePayments } from '../hooks/usePayments';
 import { Download, FileText, File, Sparkles, CheckCircle, Loader, AlertCircle } from 'lucide-react';
@@ -9,11 +9,23 @@ interface DownloadTabProps {
 }
 
 export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadTabProps) {
-  const { entitlement } = usePayments();
+  const { entitlement, refreshEntitlement } = usePayments();
   const [isExporting, setIsExporting] = useState(false);
   const [exportResult, setExportResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastFormat, setLastFormat] = useState<string>('');
+  const [pollCount, setPollCount] = useState(0);
+
+  // On mount: if not yet unlocked, poll until it flips (handles race condition after payment redirect)
+  useEffect(() => {
+    if (entitlement?.exportUnlocked) return;
+    if (pollCount >= 8) return;
+    const t = setTimeout(async () => {
+      await refreshEntitlement();
+      setPollCount(c => c + 1);
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [entitlement, pollCount]);
 
   const handleDownload = async (format: 'pdf' | 'docx' | 'txt') => {
     if (!resume.id) { setError('Please save your resume before downloading.'); return; }
@@ -57,6 +69,28 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
   };
 
   if (!entitlement?.exportUnlocked) {
+    // Still polling — show spinner
+    if (pollCount < 8) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+          <div className="relative w-14 h-14 mx-auto mb-5">
+            <svg className="animate-spin w-14 h-14" viewBox="0 0 56 56" fill="none">
+              <defs>
+                <linearGradient id="sg-dl" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#d946ef" />
+                  <stop offset="100%" stopColor="#0ba5d9" />
+                </linearGradient>
+              </defs>
+              <circle cx="28" cy="28" r="23" stroke="#f3e8ff" strokeWidth="5" fill="none" />
+              <path d="M28 5 A23 23 0 0 1 51 28" stroke="url(#sg-dl)" strokeWidth="5" strokeLinecap="round" fill="none" />
+            </svg>
+          </div>
+          <p className="text-sm font-semibold text-gray-600">Confirming your unlock...</p>
+          <p className="text-xs text-gray-400 mt-1">Just a moment</p>
+        </div>
+      );
+    }
+    // Polling exhausted — show locked message
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center px-6">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
@@ -64,7 +98,9 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
           <Download className="w-7 h-7" style={{ color: '#d946ef' }} />
         </div>
         <h3 className="text-lg font-bold text-gray-800 mb-1">Unlock to Download</h3>
-        <p className="text-sm text-gray-400">Purchase export access to download your resume here.</p>
+        <p className="text-sm text-gray-400 mb-4">Purchase export access to download your resume here.</p>
+        <button onClick={() => { setPollCount(0); refreshEntitlement(); }}
+          className="text-sm text-purple-600 underline">Try refreshing</button>
       </div>
     );
   }
