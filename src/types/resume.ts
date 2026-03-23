@@ -54,7 +54,7 @@ export interface Resume {
   education: Education[];
   skills: Skill[];
   projects: Project[];
-  template: 'modern' | 'classic' | 'creative' | 'minimal';
+  template: string;
   createdAt: string;
   updatedAt: string;
 }
