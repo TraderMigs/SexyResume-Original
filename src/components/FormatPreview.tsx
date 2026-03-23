@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Resume } from '../types/resume';
 import { usePayments } from '../hooks/usePayments';
 import { useAuth } from '../contexts/AuthContext';
+import { useResume } from '../hooks/useResume';
 import { getAllTemplates } from '../lib/templateRegistry';
 import { renderTemplate } from '../lib/templateRenderer';
 import { Lock, FileText, File, Zap, Download, Loader, CheckCircle, Tag, X } from 'lucide-react';
@@ -320,16 +321,39 @@ function PromoCodeField({ onSuccess }: { onSuccess: () => void }) {
 export default function FormatPreview({ resume, onUnlockClick, onDownload }: FormatPreviewProps) {
   const { entitlement, refreshEntitlement } = usePayments();
   const { session } = useAuth();
+  const { saveResumeToCloud } = useResume();
   const isUnlocked = entitlement?.exportUnlocked === true;
   const [isDownloading, setIsDownloading] = useState(false);
   const [activeFormat, setActiveFormat] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState('');
 
   const handleDownload = async (format: 'pdf' | 'docx' | 'ats') => {
     if (onDownload) { onDownload(format); return; }
-    if (!resume.id || !session?.access_token) return;
+    if (!session?.access_token) return;
     setIsDownloading(true);
     setActiveFormat(format);
+    setSaveError('');
     try {
+      // Auto-save resume to DB first if no ID yet
+      let resumeId = resume.id;
+      if (!resumeId) {
+        try {
+          await saveResumeToCloud(resume);
+          // After save, resume.id should be set in state — re-read from localStorage as fallback
+          const stored = localStorage.getItem('sexyresume_resume');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            resumeId = parsed.id;
+          }
+        } catch (saveErr: any) {
+          setSaveError('Could not save your resume. Please fill in your name and try again.');
+          return;
+        }
+      }
+      if (!resumeId) {
+        setSaveError('Resume could not be saved. Please fill in your Personal Info tab first.');
+        return;
+      }
       let renderedHtml = '';
       let renderedCss = '';
       if (format === 'pdf') {
@@ -346,7 +370,7 @@ export default function FormatPreview({ resume, onUnlockClick, onDownload }: For
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-resume`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resumeId: resume.id, format, template: resume.template || 'modern', watermark: false, renderedHtml, renderedCss }),
+        body: JSON.stringify({ resumeId, format, template: resume.template || 'modern', watermark: false, renderedHtml, renderedCss }),
       });
       if (!response.ok) { const e = await response.json(); throw new Error(e.error || 'Export failed'); }
       const result = await response.json();
@@ -362,7 +386,10 @@ export default function FormatPreview({ resume, onUnlockClick, onDownload }: For
         document.body.removeChild(link);
         setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
       }
-    } catch (e: any) { console.error('Download error:', e); }
+    } catch (e: any) {
+      console.error('Download error:', e);
+      setSaveError(e.message || 'Download failed. Please try again.');
+    }
     finally { setIsDownloading(false); setActiveFormat(null); }
   };
 
@@ -420,6 +447,12 @@ export default function FormatPreview({ resume, onUnlockClick, onDownload }: For
             <p className="font-bold text-green-800">All formats unlocked</p>
           </div>
           <p className="text-xs text-green-600">Click any format above to download · No watermarks · Download anytime</p>
+        </div>
+      )}
+
+      {saveError && (
+        <div className="mt-4 rounded-xl px-4 py-3 text-sm text-red-700 font-medium" style={{ background: '#fef2f2', border: '1.5px solid #fca5a5' }}>
+          {saveError}
         </div>
       )}
 
