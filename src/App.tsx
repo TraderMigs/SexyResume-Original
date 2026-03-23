@@ -18,6 +18,7 @@ import SkillsForm from './components/SkillsForm';
 import ProjectsForm from './components/ProjectsForm';
 import TemplateSelector from './components/TemplateSelector';
 import ResumePreview from './components/ResumePreview';
+import FormatPreview from './components/FormatPreview';
 import ExportOptions from './components/ExportOptions';
 import DownloadTab from './components/DownloadTab';
 import CoverLetterGenerator from './components/CoverLetterGenerator';
@@ -354,7 +355,7 @@ export default function App() {
                           />
                         )}
                         {activeTab === 'preview' && (
-                          <ResumePreview resume={resumeData} onUnlockClick={handleUnlockClick} />
+                          <FormatPreview resume={resumeData} onUnlockClick={handleUnlockClick} />
                         )}
                         {activeTab === 'export' && (
                           <ExportOptions resume={resumeData} onGenerateCoverLetter={handleCoverLetterClick} />
