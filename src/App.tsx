@@ -46,7 +46,7 @@ export default function App() {
   const { user } = useAuth();
   const { resume, saveResume } = useResume();
   const { trackPage, track } = useAnalytics();
-  const { entitlement } = usePayments();
+  const { entitlement, refreshEntitlement } = usePayments();
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('template');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -74,8 +74,19 @@ export default function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success' && user) {
-      setActiveTab('download');
       window.history.replaceState({}, document.title, window.location.pathname);
+      // Poll entitlement until it flips true (max 10 attempts, 1.5s apart)
+      let attempts = 0;
+      const maxAttempts = 10;
+      const poll = async () => {
+        await refreshEntitlement();
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 1500);
+        }
+      };
+      poll();
+      setActiveTab('download');
     }
   }, [user]);
 
