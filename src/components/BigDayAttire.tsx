@@ -30,7 +30,7 @@ const INDUSTRIES = [
       attire: 'Smart casual: dark chinos or slim-fit trousers, collared shirt or clean polo, minimalist leather sneakers or loafers.',
       grooming: 'Well-groomed. Beard is fine — keep it shaped. Hair clean and intentional.',
       color: 'Muted tones, navy, slate, olive, white. A pop of color is acceptable.',
-      notes: 'Avoid suits unless told otherwise. Smart > formal in most tech settings.'
+      notes: 'Avoid suits unless told otherwise. Smart over formal in most tech settings.'
     },
     female: {
       attire: 'Clean blouse or smart casual top with tailored trousers or dark jeans. Blazer optional. Minimalist sneakers or flats.',
@@ -63,10 +63,10 @@ const INDUSTRIES = [
     color: '#2d1b69',
     accent: '#d946ef',
     male: {
-      attire: 'Express yourself — but intentionally. Tailored dark jeans, interesting shirt or jacket, clean sneakers or boots.',
+      attire: 'Express yourself intentionally. Tailored dark jeans, interesting shirt or jacket, clean sneakers or boots.',
       grooming: 'Creative grooming is accepted — stylized hair, beard, etc. Keep it polished not sloppy.',
       color: 'Bold colors, patterns, and statement pieces work here. Wear your portfolio.',
-      notes: 'Your appearance signals your aesthetic sense. Intentional > conventional.'
+      notes: 'Your appearance signals your aesthetic sense. Intentional over conventional.'
     },
     female: {
       attire: 'Fashion-forward but professional. Structured dress, interesting separates, statement blazer. Show personality.',
@@ -90,7 +90,7 @@ const INDUSTRIES = [
       attire: 'For interview: clean dark jeans or work pants, collared shirt or clean blouse. Sturdy closed-toe shoes.',
       grooming: 'Hair tied back. Minimal makeup.',
       color: 'Dark neutrals. Practical over fashionable.',
-      notes: 'Same as male — cleanliness and practicality signal readiness over formality.'
+      notes: 'Cleanliness and practicality signal readiness over formality.'
     }
   },
   {
@@ -144,7 +144,7 @@ const INDUSTRIES = [
       attire: 'Conservative business formal. Tailored suit, modest blouse, closed-toe low heels.',
       grooming: 'Professional and conservative. Modest makeup, hair neatly styled.',
       color: 'Navy, grey, black. Nothing flashy or trendy.',
-      notes: 'Same rule — more formal is always better than less.'
+      notes: 'More formal is always better than less.'
     }
   }
 ];
@@ -168,7 +168,6 @@ function IndustryCard({ industry }: { industry: typeof INDUSTRIES[0] }) {
 
       {open && (
         <div className="bg-white px-5 py-4">
-          {/* Gender toggle */}
           <div className="flex gap-2 mb-4">
             {(['male', 'female'] as const).map(g => (
               <button
@@ -222,25 +221,17 @@ function AICareerSearch() {
     setError('');
     setResult('');
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/attire-search`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: `You are a professional career image consultant with deep knowledge of 2026 workplace dress codes, grooming standards, and first-impression etiquette across all industries. Give concise, practical, up-to-date advice. Format your response in clear sections: Male Attire, Female Attire, Grooming & Hair, Color Guide, and Pro Tips. Be specific and actionable. Do not use em dashes.`,
-          messages: [
-            {
-              role: 'user',
-              content: `What is the recommended interview attire, grooming, hair style, beard guidance, color choices, and overall appearance for someone interviewing for a "${query}" position in 2026? Cover both male and female recommendations. Include any industry-specific rules about tattoos, hair color, piercings, or unconventional styling.`
-            }
-          ]
-        })
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ career: query.trim() }),
       });
       const data = await res.json();
-      const text = data?.content?.[0]?.text || '';
-      if (!text) throw new Error('No response received');
-      setResult(text);
+      if (!res.ok || data.error) throw new Error(data.error || 'Search failed');
+      setResult(data.result || '');
     } catch (e: any) {
       setError('Search failed. Try again in a moment.');
     } finally {
@@ -261,7 +252,7 @@ function AICareerSearch() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) => e.key === 'Enter' && !loading && handleSearch()}
             placeholder="e.g. nurse, software engineer, chef, pilot..."
             className="flex-1 px-4 py-3 rounded-xl border-2 border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
           />
@@ -284,7 +275,7 @@ function AICareerSearch() {
           <div className="mt-5 rounded-xl bg-white border border-purple-100 p-5">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full" style={{ background: '#d946ef' }} />
-              <p className="text-xs font-bold text-purple-600 uppercase tracking-widest">AI Recommendations for: {query}</p>
+              <p className="text-xs font-bold text-purple-600 uppercase tracking-widest">AI Recommendations: {query}</p>
             </div>
             <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
               {result}
@@ -300,7 +291,6 @@ function AICareerSearch() {
 export default function BigDayAttire() {
   return (
     <div className="w-full max-w-3xl mx-auto pb-20">
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-black text-gray-900">Big Day Attire</h2>
         <p className="text-sm text-gray-400 mt-1">
@@ -308,12 +298,10 @@ export default function BigDayAttire() {
         </p>
       </div>
 
-      {/* AI Search — top */}
       <div className="mb-8">
         <AICareerSearch />
       </div>
 
-      {/* Static industry cards */}
       <div className="mb-4">
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Browse by Industry</p>
         <div className="flex flex-col gap-3">
@@ -323,7 +311,6 @@ export default function BigDayAttire() {
         </div>
       </div>
 
-      {/* Footer note */}
       <div className="mt-8 rounded-2xl px-5 py-4 text-center" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
         <p className="text-xs text-gray-400 leading-relaxed">
           Attire recommendations reflect 2026 professional standards. When in doubt, dress one level above what you think is required. First impressions are formed in under 7 seconds.
