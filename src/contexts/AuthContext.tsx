@@ -32,22 +32,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionRotationTimer, setSessionRotationTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
-      // Set up session rotation for authenticated users
       if (session?.user) {
         setupSessionRotation(session);
       } else {
@@ -60,8 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setupSessionRotation = (session: Session) => {
     clearSessionRotation();
-    
-    // Rotate session every 30 minutes
     const timer = setTimeout(async () => {
       try {
         const { data, error } = await supabase.auth.refreshSession();
@@ -73,8 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Session rotation error:', error);
         await signOut();
       }
-    }, 30 * 60 * 1000); // 30 minutes
-    
+    }, 30 * 60 * 1000);
     setSessionRotationTimer(timer);
   };
 
@@ -84,12 +77,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSessionRotationTimer(null);
     }
   };
+
+  // Persist email permanently — fire and forget, never blocks signup
+  const captureEmail = async (email: string, fullName: string) => {
+    try {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
+        body: JSON.stringify({ email, full_name: fullName, source: 'signup' }),
+      });
+    } catch (e) {
+      // silently ignore — never block the user
+    }
+  };
+
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setError(null);
       setLoading(true);
 
-      // Validate password strength on client side
       const passwordValidation = validatePasswordStrength(password);
       if (!passwordValidation.isValid) {
         throw new Error(passwordValidation.error);
@@ -99,15 +105,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-          },
+          data: { full_name: fullName },
         },
       });
 
       if (error) throw error;
 
-      // Note: User will need to confirm email before they can sign in
+      // Capture email permanently regardless of 24hr account lifecycle
+      captureEmail(email, fullName);
+
       if (data.user && !data.session) {
         setError('Please check your email and click the confirmation link to complete your registration.');
       }
@@ -124,24 +130,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       setLoading(true);
 
-      // Log sign-in attempt
       logSecurityEvent({
         type: 'auth_attempt',
         details: `Sign-in attempt for email: ${email}`,
         ip: 'unknown'
       });
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
       setSession(data.session);
       setUser(data.user);
-      
-      // Set up session rotation
       if (data.session) {
         setupSessionRotation(data.session);
       }
@@ -176,32 +175,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (password.length < 12) {
       return { isValid: false, error: 'Password must be at least 12 characters long' };
     }
-    
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
     const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-    
     if (!hasUppercase || !hasLowercase || !hasNumbers || !hasSpecialChars) {
-      return { 
-        isValid: false, 
-        error: 'Password must include uppercase, lowercase, numbers, and special characters' 
+      return {
+        isValid: false,
+        error: 'Password must include uppercase, lowercase, numbers, and special characters'
       };
     }
-    
     return { isValid: true };
   };
 
-  const value = {
-    user,
-    session,
-    loading,
-    signUp,
-    signIn,
-    signOut,
-    error,
-    clearError,
-  };
-
+  const value = { user, session, loading, signUp, signIn, signOut, error, clearError };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -4,7 +4,7 @@ import { usePayments } from '../hooks/usePayments';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllTemplates } from '../lib/templateRegistry';
 import { renderTemplate } from '../lib/templateRenderer';
-import { Lock, FileText, File, Zap, Download, Loader, CheckCircle } from 'lucide-react';
+import { Lock, FileText, File, Zap, Download, Loader, CheckCircle, Tag, X } from 'lucide-react';
 
 interface FormatPreviewProps {
   resume: Resume;
@@ -79,7 +79,6 @@ function PDFPreviewCard({ resume, isUnlocked, onDownload }: any) {
           <div className="flex items-center justify-center" style={{ height: '600px' }}><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" /></div>
         )}
 
-        {/* Blur gate — starts at 30% from bottom, shows 70% of content */}
         {!isUnlocked && scaledHeight && (
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0.85) 50%,white 100%)', pointerEvents: 'none' }} />
         )}
@@ -235,9 +234,91 @@ function ATSPreviewCard({ resume, isUnlocked, onDownload }: any) {
   );
 }
 
+// ── Promo Code Field ──────────────────────────────────────────────────────────
+function PromoCodeField({ onSuccess }: { onSuccess: () => void }) {
+  const { session } = useAuth();
+  const [code, setCode] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+  const [expanded, setExpanded] = useState(false);
+
+  const handleRedeem = async () => {
+    if (!code.trim()) return;
+    if (!session) { setStatus('error'); setMessage('Please sign in first'); return; }
+    setStatus('loading');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/redeem-code`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus('success');
+        setMessage('Code applied! Your downloads are now unlocked.');
+        setTimeout(() => onSuccess(), 1200);
+      } else {
+        setStatus('error');
+        setMessage(data.error || 'Invalid code');
+      }
+    } catch {
+      setStatus('error');
+      setMessage('Something went wrong. Try again.');
+    }
+  };
+
+  if (!expanded) {
+    return (
+      <div className="mt-4 text-center">
+        <button onClick={() => setExpanded(true)} className="text-sm text-purple-500 hover:text-purple-700 underline underline-offset-2 transition-colors">
+          Got a code?
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 rounded-xl p-4" style={{ background: '#faf5ff', border: '1px solid #e9d5ff' }}>
+      <div className="flex items-center gap-2 mb-3">
+        <Tag size={14} style={{ color: '#7c3aed' }} />
+        <span className="text-sm font-semibold text-purple-800">Enter your code</span>
+        <button onClick={() => { setExpanded(false); setStatus('idle'); setMessage(''); }} className="ml-auto text-gray-400 hover:text-gray-600">
+          <X size={14} />
+        </button>
+      </div>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          onKeyDown={(e) => e.key === 'Enter' && handleRedeem()}
+          placeholder="YOURCODE"
+          disabled={status === 'loading' || status === 'success'}
+          className="flex-1 px-3 py-2 rounded-lg border border-purple-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+          style={{ letterSpacing: '2px' }}
+        />
+        <button
+          onClick={handleRedeem}
+          disabled={!code.trim() || status === 'loading' || status === 'success'}
+          className="px-4 py-2 rounded-lg text-white text-sm font-bold transition-all hover:scale-105 disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg,#7c3aed,#d946ef)' }}
+        >
+          {status === 'loading' ? <Loader size={14} className="animate-spin" /> : 'Apply'}
+        </button>
+      </div>
+      {message && (
+        <p className={`mt-2 text-xs font-medium ${status === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+          {status === 'success' && <CheckCircle size={12} className="inline mr-1" />}
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ── Main FormatPreview ────────────────────────────────────────────────────────
 export default function FormatPreview({ resume, onUnlockClick, onDownload }: FormatPreviewProps) {
-  const { entitlement } = usePayments();
+  const { entitlement, refreshEntitlement } = usePayments();
   const { session } = useAuth();
   const isUnlocked = entitlement?.exportUnlocked === true;
   const [isDownloading, setIsDownloading] = useState(false);
@@ -310,7 +391,6 @@ export default function FormatPreview({ resume, onUnlockClick, onDownload }: For
         <ATSPreviewCard resume={resume} isUnlocked={isUnlocked} onDownload={handleDownload} />
       </div>
 
-      {/* Single unified unlock CTA — shown only when not yet unlocked */}
       {!isUnlocked && (
         <div className="mt-10 rounded-2xl p-8 text-center" style={{ background: 'linear-gradient(135deg,#fdf4ff,#eff6ff)', border: '2px solid #e9d5ff' }}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'linear-gradient(135deg,#d946ef,#0ba5d9)' }}>
@@ -327,10 +407,12 @@ export default function FormatPreview({ resume, onUnlockClick, onDownload }: For
             Unlock All 3 Formats — $7.00
           </button>
           <p className="text-xs text-gray-400 mt-3">One-time · No subscription · Download anytime</p>
+
+          {/* Promo code field — sits below the pay button */}
+          <PromoCodeField onSuccess={() => refreshEntitlement()} />
         </div>
       )}
 
-      {/* Unlocked confirmation banner */}
       {isUnlocked && (
         <div className="mt-10 rounded-2xl p-6 text-center" style={{ background: 'linear-gradient(135deg,#f0fdf4,#ecfdf5)', border: '2px solid #86efac' }}>
           <div className="flex items-center justify-center gap-2 mb-1">

@@ -21,6 +21,7 @@ import ResumePreview from './components/ResumePreview';
 import FormatPreview from './components/FormatPreview';
 import ExportOptions from './components/ExportOptions';
 import DownloadTab from './components/DownloadTab';
+import AdminTab from './components/AdminTab';
 import CoverLetterGenerator from './components/CoverLetterGenerator';
 import ResumeUpload from './components/ResumeUpload';
 import CookieConsent, { ConsentPreferences } from './components/CookieConsent';
@@ -34,10 +35,10 @@ import { SEO_PAGES } from './lib/seo';
 import { Resume, PersonalInfo, Experience, Education, Skill, Project } from './types/resume';
 import {
   User, Briefcase, GraduationCap, Zap, FolderOpen,
-  Palette, Eye, Download, CheckCircle, Lock,
+  Palette, Eye, Download, CheckCircle, Lock, Shield,
 } from 'lucide-react';
 
-type ActiveTab = 'personal' | 'experience' | 'education' | 'skills' | 'projects' | 'template' | 'preview' | 'export' | 'download';
+type ActiveTab = 'personal' | 'experience' | 'education' | 'skills' | 'projects' | 'template' | 'preview' | 'export' | 'download' | 'admin';
 type PostAuthAction = 'goTemplate' | 'goPersonal' | 'goTab' | 'export' | null;
 
 // Three app states for logged-out users
@@ -205,6 +206,7 @@ export default function App() {
     { id: 'preview' as const, label: 'Preview', icon: Eye, requiresAuth: false },
     ...(!entitlement?.exportUnlocked ? [{ id: 'export' as const, label: 'Export', icon: Download, requiresAuth: true }] : []),
     ...(entitlement?.exportUnlocked ? [{ id: 'download' as const, label: 'Download', icon: CheckCircle, requiresAuth: true }] : []),
+    ...(user?.email === 'sexyresumeai@gmail.com' ? [{ id: 'admin' as const, label: 'Admin', icon: Shield, requiresAuth: true }] : []),
   ];
 
   return (
@@ -362,6 +364,9 @@ export default function App() {
                         )}
                         {activeTab === 'download' && (
                           <DownloadTab resume={resumeData} onGenerateCoverLetter={handleCoverLetterClick} />
+                        )}
+                        {activeTab === 'admin' && (
+                          <AdminTab />
                         )}
                       </div>
                     </div>
