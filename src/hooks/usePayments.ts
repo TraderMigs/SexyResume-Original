@@ -49,7 +49,11 @@ export function usePayments(): UsePaymentsReturn {
       }
 
       const data = await response.json();
-      setEntitlement(data);
+      // Map snake_case DB columns → camelCase TypeScript type
+      setEntitlement({
+        exportUnlocked: data.export_unlocked ?? false,
+        exportUnlockedAt: data.export_unlocked_at ?? null,
+      });
     } catch (err: any) {
       setError(err.message);
     } finally {
