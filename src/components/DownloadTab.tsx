@@ -55,12 +55,17 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
       }
       const result = await response.json();
       if (result.downloadUrl) {
+        // Fetch the file as a blob so download happens in-browser without navigating away
+        const fileResponse = await fetch(result.downloadUrl);
+        const blob = await fileResponse.blob();
+        const objectUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = result.downloadUrl;
+        link.href = objectUrl;
         link.download = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.${format}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
         setExportResult(result.downloadUrl);
       }
     } catch (err: any) {
@@ -170,7 +175,18 @@ export default function DownloadTab({ resume, onGenerateCoverLetter }: DownloadT
           <div>
             <p className="text-green-800 text-sm font-semibold">Downloaded successfully!</p>
             <button
-              onClick={() => { const link = document.createElement('a'); link.href = exportResult; link.download = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.${lastFormat}`; document.body.appendChild(link); link.click(); document.body.removeChild(link); }}
+              onClick={async () => {
+                const fileResponse = await fetch(exportResult);
+                const blob = await fileResponse.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.${lastFormat}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+              }}
               className="text-xs text-green-600 underline mt-0.5"
             >Download again</button>
           </div>
