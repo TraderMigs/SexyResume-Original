@@ -98,6 +98,26 @@ function PDFPreviewCard({ resume, isUnlocked, onDownload }: any) {
 // ── Word Preview ──────────────────────────────────────────────────────────────
 function WordPreviewCard({ resume, isUnlocked, onDownload }: any) {
   const { personalInfo, experience, education, skills } = resume;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [scaledHeight, setScaledHeight] = useState<number | null>(null);
+  const WORD_WIDTH_PX = 816;
+
+  const updateScale = useCallback(() => {
+    if (!containerRef.current || !contentRef.current) return;
+    const w = containerRef.current.offsetWidth;
+    const s = Math.min(w / WORD_WIDTH_PX, 1);
+    setScale(s);
+    setScaledHeight(contentRef.current.scrollHeight * s);
+  }, []);
+
+  useEffect(() => { const t = setTimeout(updateScale, 80); return () => clearTimeout(t); }, [personalInfo, updateScale]);
+  useEffect(() => {
+    const obs = new ResizeObserver(updateScale);
+    if (containerRef.current) obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, [updateScale]);
 
   const wordHtml = `
     <div style="font-family: 'Calibri', 'Arial', sans-serif; padding: 56px 64px; color: #1a1a1a; line-height: 1.6; background: white;">
@@ -160,14 +180,17 @@ function WordPreviewCard({ resume, isUnlocked, onDownload }: any) {
         </div>
       </div>
 
-      <div className="relative border-2 border-blue-100 rounded-xl overflow-hidden shadow-lg bg-white" style={{ maxWidth: '816px', margin: '0 auto', width: '100%' }}>
-        <div style={{ userSelect: 'none', WebkitUserSelect: 'none' }} dangerouslySetInnerHTML={{ __html: wordHtml }} />
+      <div ref={containerRef} className="relative border-2 border-blue-100 rounded-xl overflow-hidden shadow-lg bg-white"
+        style={{ height: scaledHeight ? `${scaledHeight}px` : 'auto', maxWidth: '816px', margin: '0 auto', width: '100%' }}>
+        <div style={{ width: `${WORD_WIDTH_PX}px`, transformOrigin: 'top left', transform: `scale(${scale})`, position: 'absolute', top: 0, left: 0 }}>
+          <div ref={contentRef} style={{ userSelect: 'none', WebkitUserSelect: 'none' }} dangerouslySetInnerHTML={{ __html: wordHtml }} />
+        </div>
 
-        {!isUnlocked && (
+        {!isUnlocked && scaledHeight && (
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%', zIndex: 20, background: 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0.85) 50%,white 100%)', pointerEvents: 'none' }} />
         )}
         {isUnlocked && (
-          <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', zIndex: 20, display: 'flex', justifyContent: 'center' }}>
             <button onClick={() => onDownload('docx')} className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:scale-105 shadow-lg" style={{ background: '#2b579a' }}>
               <Download size={16} /> Download Word
             </button>
@@ -214,10 +237,12 @@ function ATSPreviewCard({ resume, isUnlocked, onDownload }: any) {
       </div>
 
       <div className="relative border-2 border-green-100 rounded-xl overflow-hidden shadow-lg" style={{ maxWidth: '816px', margin: '0 auto', width: '100%', background: '#0d1117' }}>
-        <div style={{ padding: '28px 32px', fontFamily: "'Courier New', Courier, monospace", fontSize: '12px', lineHeight: '1.8', color: '#e6edf3', whiteSpace: 'pre-wrap', userSelect: 'none', WebkitUserSelect: 'none' }}>
-          <span style={{ color: '#7ee787' }}>{'// ATS-OPTIMIZED RESUME FORMAT'}</span>{'\n'}
-          <span style={{ color: '#7ee787' }}>{'// Maximum compatibility with applicant tracking systems'}</span>{'\n\n'}
-          {atsText}
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ padding: '20px 24px', fontFamily: "'Courier New', Courier, monospace", fontSize: '12px', lineHeight: '1.8', color: '#e6edf3', whiteSpace: 'pre', userSelect: 'none', WebkitUserSelect: 'none', minWidth: 'max-content' }}>
+            <span style={{ color: '#7ee787' }}>{'// ATS-OPTIMIZED RESUME FORMAT'}</span>{'\n'}
+            <span style={{ color: '#7ee787' }}>{'// Maximum compatibility with applicant tracking systems'}</span>{'\n\n'}
+            {atsText}
+          </div>
         </div>
 
         {!isUnlocked && (
