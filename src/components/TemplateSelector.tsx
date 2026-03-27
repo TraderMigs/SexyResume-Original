@@ -313,22 +313,22 @@ export default function TemplateSelector({
 
       {/* Template Preview Modal */}
       {previewTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 shrink-0">
+              <h3 className="text-base font-semibold text-gray-900 truncate pr-4">
                 Template Preview: {templates.find(t => t.id === previewTemplate)?.name}
               </h3>
-              <button onClick={() => setPreviewTemplate(null)} className="text-gray-400 hover:text-gray-600 transition-colors">✕</button>
+              <button onClick={() => setPreviewTemplate(null)} className="text-gray-400 hover:text-gray-600 transition-colors shrink-0">✕</button>
             </div>
-            <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <div className="flex-1 overflow-y-auto p-3">
               <TemplatePreview resume={resume} templateId={previewTemplate} customizations={customizations} />
             </div>
-            <div className="flex justify-between items-center p-4 border-t border-gray-200">
-              <button onClick={() => setPreviewTemplate(null)} className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">Close</button>
+            <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 shrink-0">
+              <button onClick={() => setPreviewTemplate(null)} className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors text-sm">Close</button>
               <button
                 onClick={() => { handleTemplateSelect(previewTemplate); setPreviewTemplate(null); }}
-                className="px-6 py-2 bg-sexy-pink-600 text-white rounded-lg hover:bg-sexy-pink-700 transition-colors"
+                className="px-6 py-2.5 bg-sexy-pink-600 text-white rounded-xl hover:bg-sexy-pink-700 transition-colors text-sm font-semibold"
               >
                 Use This Template
               </button>
@@ -366,9 +366,20 @@ function TemplatePreview({
   }
 
   return (
-    <div className="transform scale-75 origin-top-left w-[133%] border border-gray-200 rounded-lg overflow-hidden">
+    <div className="w-full overflow-hidden border border-gray-200 rounded-lg">
       <style dangerouslySetInnerHTML={{ __html: rendered.css }} />
-      <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
+      <div style={{ width: '816px', transformOrigin: 'top left', transform: 'scale(var(--preview-scale, 0.45))', display: 'block' }}
+        ref={(el) => {
+          if (el) {
+            const parent = el.parentElement;
+            if (parent) {
+              const s = parent.offsetWidth / 816;
+              el.style.setProperty('--preview-scale', String(s));
+              parent.style.height = `${el.scrollHeight * s}px`;
+            }
+          }
+        }}
+        dangerouslySetInnerHTML={{ __html: rendered.html }} />
     </div>
   );
 }
